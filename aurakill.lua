@@ -85,3 +85,9 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/auto%20Infinity%20Tower"))()
 end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Behind", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auto%20behind"))()
+end})
