@@ -313,7 +313,7 @@ towerBtn.MouseButton1Click:Connect(function()
 				local displayNum = tonumber(text:match("%d+")) or floorInternal
 
 				-- update GUI title
-				Title.Text = "⚙️ Auto Tools | Floor: " .. displayNum
+				Title.Text = "⚙️ Tower Floor: " .. displayNum
 
 				if displayNum >= 325 then
 					stopFight()
