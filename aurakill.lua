@@ -48,19 +48,40 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 end})
 GUI:CreateButton({
     parent = main, 
+    text = "Fast Relog", 
+    callback = function()
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local placeId = game.PlaceId
+
+-- Ganti sesuai place id target kamu
+local targetPlaceId = 126991914853936
+
+if placeId == targetPlaceId then
+    -- Tunggu beberapa detik biar game sempat load (opsional)
+    task.wait(2)
+
+    -- Auto relog (rejoin ke place yang sama)
+    TeleportService:Teleport(targetPlaceId, player)
+end
+end})
+GUI:CreateButton({
+    parent = main, 
     text = "Auto Train Strenght", 
     callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auto%20Train"))()
 end})
 GUI:CreateButton({
     parent = main, 
     text = "Auto Select Attack", 
     callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/auto%20Attack"))()
 end})
 GUI:CreateButton({
     parent = main, 
     text = "Auto infinity Tower", 
     callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/auto%20Infinity%20Tower"))()
 end})
