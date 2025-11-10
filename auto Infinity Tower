@@ -1,7 +1,6 @@
--- 🌟 Auto Behind + Auto Teleport + Auto Next Floor + Auto Tower Loop (Optimized + Minimize Icon)
--- Made by ChatGPT
--- All-in-one Automation GUI (4 Toggles)
+-- 🌟 Auto Behind + Auto Teleport + Auto Next Floor + Auto Tower Loop + Floor Indicator (Optimized + Minimize Icon)
 
+-- All-in-one Automation GUI (4 Toggles + Floor Display)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -18,12 +17,10 @@ ScreenGui.Name = "AutoSystemGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = playerGui
-ScreenGui.ResetOnSpawn = false
-
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 240, 0, 260)
-Frame.Position = UDim2.new(0.5, -120, 0.5, -130)
+Frame.Size = UDim2.new(0, 240, 0, 280)
+Frame.Position = UDim2.new(0.5, -120, 0.5, -140)
 Frame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
 Frame.BorderSizePixel = 0
 Frame.Active, Frame.Draggable = true, true
@@ -97,7 +94,32 @@ Icon.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------------------
--- TOGGLE 1: Auto Behind Enemy
+-- 🏢 FLOOR INDICATOR
+-------------------------------------------------------------
+local FloorLabel = Instance.new("TextLabel", Frame)
+FloorLabel.Size = UDim2.new(1, -20, 0, 25)
+FloorLabel.Position = UDim2.new(0, 10, 0, 35)
+FloorLabel.BackgroundTransparency = 1
+FloorLabel.Font = Enum.Font.GothamSemibold
+FloorLabel.TextColor3 = Color3.fromRGB(40, 40, 40)
+FloorLabel.TextSize = 16
+FloorLabel.Text = "🏢 Floor: N/A"
+FloorLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Update floor text realtime dari workspace tower display
+task.spawn(function()
+	while task.wait(0.5) do
+		pcall(function()
+			local bottom = Workspace.Map.Tower.Items.VFX.Display.Frame:FindFirstChild("Bottom")
+			if bottom and bottom:IsA("TextLabel") then
+				FloorLabel.Text = "🏢 Floor: " .. tostring(bottom.Text)
+			end
+		end)
+	end
+end)
+
+-------------------------------------------------------------
+-- Toggle Button Maker
 -------------------------------------------------------------
 local function makeButton(y,text)
 	local b = Instance.new("TextButton",Frame)
@@ -113,8 +135,10 @@ local function makeButton(y,text)
 	return b
 end
 
--- === AUTO BEHIND
-local behindBtn = makeButton(45,"Auto Behind: OFF")
+-------------------------------------------------------------
+-- TOGGLE 1: Auto Behind Enemy
+-------------------------------------------------------------
+local behindBtn = makeButton(65,"Auto Behind: OFF")
 local behindEnabled, behindConnection = false
 
 local function toggleBehind(state)
@@ -154,7 +178,7 @@ end)
 -------------------------------------------------------------
 -- TOGGLE 2: Auto Teleport
 -------------------------------------------------------------
-local tpBtn = makeButton(95,"Auto Teleport: OFF")
+local tpBtn = makeButton(115,"Auto Teleport: OFF")
 local tpEnabled, tpConnection = false
 local function toggleTP(state)
 	if state then
@@ -190,7 +214,7 @@ end)
 -------------------------------------------------------------
 -- TOGGLE 3: Auto Next Floor
 -------------------------------------------------------------
-local nextBtn = makeButton(145,"Auto Next Floor: OFF")
+local nextBtn = makeButton(165,"Auto Next Floor: OFF")
 local nextEnabled, nextConn = false
 local lastSend = 0
 local function toggleNext(state)
@@ -218,7 +242,7 @@ end)
 -------------------------------------------------------------
 -- 🗼 TOGGLE 4: Auto Tower Loop (1–330)
 -------------------------------------------------------------
-local towerBtn = makeButton(195,"Auto Tower Loop: OFF")
+local towerBtn = makeButton(215,"Auto Tower Loop: OFF")
 local towerEnabled = false
 local towerThread
 
