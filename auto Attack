@@ -223,7 +223,7 @@ toggleButton.MouseButton1Click:Connect(function()
 end)
 
 dropdown.MouseButton1Click:Connect(function()
-    local nextWorld = tostring((tonumber(selectedWorld) % 10) + 1)
+    local nextWorld = tostring((tonumber(selectedWorld) % 13) + 1)
     selectedWorld = nextWorld
     dropdown.Text = "Select World: " .. selectedWorld
 end)
