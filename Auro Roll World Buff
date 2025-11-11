@@ -1,0 +1,155 @@
+-- 🌍 Auto World Buff GUI (Dropdown Scroll + Loop 1s)
+-- by ChatGPT (final stable version)
+
+pcall(function()
+	game:GetService("CoreGui"):FindFirstChild("WorldBuffUI"):Destroy()
+end)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+
+-- GUI Container
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "WorldBuffUI"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 230, 0, 160)
+Frame.Position = UDim2.new(0.5, -115, 0.5, -80)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -25, 0, 25)
+Title.Position = UDim2.new(0, 5, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "🌍 Auto World Buff"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Frame
+
+-- Close Button (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Position = UDim2.new(1, -25, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 16
+CloseBtn.Parent = Frame
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+-- Dropdown Button
+local DropDown = Instance.new("TextButton")
+DropDown.Size = UDim2.new(1, -20, 0, 30)
+DropDown.Position = UDim2.new(0, 10, 0, 40)
+DropDown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+DropDown.Text = "Select World"
+DropDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+DropDown.Font = Enum.Font.Gotham
+DropDown.TextSize = 14
+DropDown.ZIndex = 2
+DropDown.Parent = Frame
+
+-- Dropdown Frame (Scrollable)
+local DropFrame = Instance.new("ScrollingFrame")
+DropFrame.Size = UDim2.new(1, 0, 0, 0)
+DropFrame.Position = UDim2.new(0, 0, 1, 0)
+DropFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+DropFrame.BorderSizePixel = 0
+DropFrame.Visible = false
+DropFrame.CanvasSize = UDim2.new(0, 0, 0, 17 * 25)
+DropFrame.ScrollBarThickness = 4
+DropFrame.ZIndex = 5
+DropFrame.Parent = DropDown
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = DropFrame
+
+local selectedWorld = nil
+
+-- Buat daftar World 1 - 17
+for i = 1, 17 do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 25)
+	btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	btn.Text = "World" .. i
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.ZIndex = 6
+	btn.Parent = DropFrame
+
+	btn.MouseButton1Click:Connect(function()
+		selectedWorld = "World" .. i
+		DropDown.Text = selectedWorld
+		DropFrame.Visible = false
+	end)
+end
+
+DropDown.MouseButton1Click:Connect(function()
+	DropFrame.Visible = not DropFrame.Visible
+	DropFrame.Size = DropFrame.Visible and UDim2.new(1, 0, 0, 150) or UDim2.new(1, 0, 0, 0)
+end)
+
+-- Toggle Button
+local toggle = false
+local loopThread = nil
+
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(1, -20, 0, 30)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 90)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleBtn.Text = "Auto Buff: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 14
+ToggleBtn.ZIndex = 1
+ToggleBtn.Parent = Frame
+
+-- Indicator Label
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, -20, 0, 20)
+StatusLabel.Position = UDim2.new(0, 10, 0, 125)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 13
+StatusLabel.Text = "Waiting..."
+StatusLabel.ZIndex = 1
+StatusLabel.Parent = Frame
+
+ToggleBtn.MouseButton1Click:Connect(function()
+	toggle = not toggle
+	ToggleBtn.Text = "Auto Buff: " .. (toggle and "ON" or "OFF")
+	ToggleBtn.BackgroundColor3 = toggle and Color3.fromRGB(50, 200, 90) or Color3.fromRGB(200, 50, 50)
+
+	if toggle then
+		loopThread = task.spawn(function()
+			while toggle do
+				if selectedWorld then
+					local args = { selectedWorld }
+					ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("WorldBuff"):FireServer(unpack(args))
+					StatusLabel.Text = "Looping: " .. selectedWorld
+				else
+					StatusLabel.Text = "Please select a world!"
+				end
+				task.wait(0.1) -- ⏱️ delay 1 detik
+			end
+		end)
+	else
+		StatusLabel.Text = "Paused."
+	end
+end)
