@@ -22,14 +22,13 @@ frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
-frame.Visible = true
 
 local titleBar = Instance.new("Frame", frame)
 titleBar.Size = UDim2.new(1, 0, 0, 26)
 titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 
 local title = Instance.new("TextLabel", titleBar)
-title.Size = UDim2.new(1, -50, 1, 0)
+title.Size = UDim2.new(1, -60, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Auto Attack"
@@ -38,28 +37,30 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
 
+-- CLOSE BUTTON
 local closeBtn = Instance.new("TextButton", titleBar)
 closeBtn.Size = UDim2.new(0, 24, 0, 24)
 closeBtn.Position = UDim2.new(1, -28, 0, 1)
 closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 14
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 closeBtn.AutoButtonColor = false
+
 closeBtn.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
+-- MINIMIZE BUTTON
 local minimizeBtn = Instance.new("TextButton", titleBar)
 minimizeBtn.Size = UDim2.new(0, 24, 0, 24)
 minimizeBtn.Position = UDim2.new(1, -56, 0, 1)
 minimizeBtn.Text = "-"
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextSize = 14
-minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-minimizeBtn.AutoButtonColor = false
 
 local minimized = false
 minimizeBtn.MouseButton1Click:Connect(function()
@@ -72,7 +73,7 @@ minimizeBtn.MouseButton1Click:Connect(function()
     frame.Size = minimized and UDim2.new(0, 200, 0, 26) or UDim2.new(0, 200, 0, 150)
 end)
 
--- // Buttons
+-- // BUTTONS
 local toggleButton = Instance.new("TextButton", frame)
 toggleButton.Size = UDim2.new(1, -20, 0, 32)
 toggleButton.Position = UDim2.new(0, 10, 0, 40)
@@ -81,7 +82,6 @@ toggleButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
 toggleButton.Font = Enum.Font.Gotham
 toggleButton.TextSize = 14
-toggleButton.AutoButtonColor = false
 
 local dropdown = Instance.new("TextButton", frame)
 dropdown.Size = UDim2.new(1, -20, 0, 32)
@@ -91,9 +91,8 @@ dropdown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 dropdown.TextColor3 = Color3.new(1, 1, 1)
 dropdown.Font = Enum.Font.Gotham
 dropdown.TextSize = 13
-dropdown.AutoButtonColor = false
 
--- // Attack Data
+-- // WORLD DATA (5 MOB PER WORLD)
 local worldData = {
     ["1"] = {
         "\000\000\001\001\000\004Monk",
@@ -171,67 +170,78 @@ local worldData = {
         "\000\000\001\001\000\rOban Disciple",
         "\000\000\001\001\000\fOban Scholar",
         "\000\000\001\001\000\vOban Sensei"
-	},
+    },
     ["12"] = {
         "\000\000\001\001\000\nOban Pupil",
         "\000\000\001\001\000\fOban Student",
         "\000\000\001\001\000\rOban Disciple",
         "\000\000\001\001\000\fOban Scholar",
-        "\000\000\001\001\000\vOban Sensei"	
-	},
+        "\000\000\001\001\000\vOban Sensei"
+    },
     ["13"] = {
-		"\000\000\001\001\000\vLower Demon",
-		"\000\000\001\001\000\014Nakim Infinity",
-		"\000\000\001\001\000\014Kaiga Infinity",
-		"\000\000\001\001\000\fAka Infinity",
-		"\000\000\001\001\000\rDoma Infinity"
-	},
+        "\000\000\001\001\000\vLower Demon",
+        "\000\000\001\001\000\014Nakim Infinity",
+        "\000\000\001\001\000\014Kaiga Infinity",
+        "\000\000\001\001\000\fAka Infinity",
+        "\000\000\001\001\000\rDoma Infinity"
+    },
     ["14"] = {
-		"\000\000\001\001\000\tLow Demon",
-		"\000\000\001\001\000\fLower Wraith",
-		"\000\000\001\001\000\vLower Ghoul",
-		"\000\000\001\001\000\tLower Oni",
-		"\000\000\001\001\000\rKaiga The Bum"
-	}
+        "\000\000\001\001\000\tLow Demon",
+        "\000\000\001\001\000\fLower Wraith",
+        "\000\000\001\001\000\vLower Ghoul",
+        "\000\000\001\001\000\tLower Oni",
+        "\000\000\001\001\000\rKaiga The Bum"
+    },
+    ["15"] = {
+		"\000\000\001\001\000\018Lower Demon Palace",
+		"\000\000\001\001\000\019Lower Wraith Palace",
+		"\000\000\001\001\000\018Lower Ghoul Palace",
+		"\000\000\001\001\000\016Lower Oni Palace",
+		"\000\000\001\001\000\nAka Palace"
+    }
 }
 
--- // Logic
+-- // LOGIC
 local selectedWorld = "1"
 local attackRunning = false
-local attackLoop
 
 local function attackWorld(worldId)
     local mobs = worldData[worldId]
     if not mobs then return end
-    for _, mob in ipairs(mobs) do
-        local args = { buffer.fromstring(mob) }
-        pcall(function()
-            Remote:FireServer(unpack(args))
-        end)
+
+    for _, raw in ipairs(mobs) do
+        local buf = buffer.fromstring(raw)
+        if buf then
+            pcall(function()
+                Remote:FireServer(buf)
+            end)
+        end
     end
 end
 
 toggleButton.MouseButton1Click:Connect(function()
     attackRunning = not attackRunning
+
     if attackRunning then
         toggleButton.Text = "ON"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-        attackLoop = task.spawn(function()
+        toggleButton.BackgroundColor3 = Color3.fromRGB(50, 170, 50)
+
+        task.spawn(function()
             while attackRunning do
                 attackWorld(selectedWorld)
-                task.wait(0.02)
+                task.wait(0.005) -- SUPER FAST (5ms)
             end
         end)
+
     else
         toggleButton.Text = "OFF"
         toggleButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-        attackRunning = false
     end
 end)
 
+-- World Switcher
 dropdown.MouseButton1Click:Connect(function()
-    local nextWorld = tostring((tonumber(selectedWorld) % 14) + 1)
+    local nextWorld = tostring((tonumber(selectedWorld) % 15) + 1)
     selectedWorld = nextWorld
     dropdown.Text = "Select World: " .. selectedWorld
 end)
-
