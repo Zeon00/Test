@@ -97,3 +97,15 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auro%20Roll%20World%20Buff"))()
 end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Hatch Pet", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Hatch%20Pet"))()
+end})
+
+
+
+
+
+
