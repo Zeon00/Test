@@ -1,0 +1,312 @@
+-- 🌟 Infinity Skill (Switch World ◀ World ▶) — FULL FINAL
+-- Features: Left/Right world switch, per-world RAW, Toggle, Minimize (safe), Floating icon, Close
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Mastery = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Mastery")
+local CoreGui = game:GetService("CoreGui")
+
+-- ========== WORLD RAW (dari lu) ==========
+local WorldSkills = {
+    ["1"] = {
+        "\000\000\001\001\000\004Monk",
+        "\000\000\001\001\000\aStudent",
+        "\000\000\001\001\000\aSamurai",
+        "\000\000\001\001\000\003Oni",
+        "\000\000\001\001\000\aWarrior"
+    },
+    ["2"] = {
+        "\000\000\001\001\000\003Odo",
+        "\000\000\001\001\000\005Newma",
+        "\000\000\001\001\000\004Yaha",
+        "\000\000\001\001\000\004Susa",
+        "\000\000\001\001\000\003Kyo"
+    },
+    ["3"] = {
+        "\000\000\001\001\000\014Brother Spider",
+        "\000\000\001\001\000\rSister Spider",
+        "\000\000\001\001\000\rMother Spider",
+        "\000\000\001\001\000\rFather Spider",
+        "\000\000\001\001\000\004Rewi"
+    },
+    ["4"] = {
+        "\000\000\001\001\000\006Waiter",
+        "\000\000\001\001\000\tConductor",
+        "\000\000\001\001\000\aSlasher",
+        "\000\000\001\001\000\003Emu",
+        "\000\000\001\001\000\003Aka"
+    },
+    ["5"] = {
+        "\000\000\001\001\000\nLeaf Demon",
+        "\000\000\001\001\000\fFlower Demon",
+        "\000\000\001\001\000\tDak Oiran",
+        "\000\000\001\001\000\003Dak",
+        "\000\000\001\001\000\003Gyu"
+    },
+    ["6"] = {
+        "\000\000\001\001\000\004Aize",
+        "\000\000\001\001\000\005Urogi",
+        "\000\000\001\001\000\004Kara",
+        "\000\000\001\001\000\003Gyo",
+        "\000\000\001\001\000\004Zoha"
+    },
+    ["7"] = {
+        "\000\000\001\001\000\tTen Pupil",
+        "\000\000\001\001\000\vTen Student",
+        "\000\000\001\001\000\fTen Disciple",
+        "\000\000\001\001\000\vTen Scholar",
+        "\000\000\001\001\000\nTen Sensei"
+    },
+    ["8"] = {
+        "\000\000\001\001\000\fMuichi Pupil",
+        "\000\000\001\001\000\014Muichi Student",
+        "\000\000\001\001\000\015Muichi Disciple",
+        "\000\000\001\001\000\014Muichi Scholar",
+        "\000\000\001\001\000\rMuichi Sensei"
+    },
+    ["9"] = {
+        "\000\000\001\001\000\vMitsu Pupil",
+        "\000\000\001\001\000\rMitsu Student",
+        "\000\000\001\001\000\014Mitsu Disciple",
+        "\000\000\001\001\000\rMitsu Scholar",
+        "\000\000\001\001\000\fMitsu Sensei"
+    },
+    ["10"] = {
+        "\000\000\001\001\000\nOban Pupil",
+        "\000\000\001\001\000\fOban Student",
+        "\000\000\001\001\000\rOban Disciple",
+        "\000\000\001\001\000\fOban Scholar",
+        "\000\000\001\001\000\vOban Sensei"
+    },
+    ["11"] = {
+        "\000\000\001\001\000\nOban Pupil",
+        "\000\000\001\001\000\fOban Student",
+        "\000\000\001\001\000\rOban Disciple",
+        "\000\000\001\001\000\fOban Scholar",
+        "\000\000\001\001\000\vOban Sensei"
+    },
+    ["12"] = {
+        "\000\000\001\001\000\nOban Pupil",
+        "\000\000\001\001\000\fOban Student",
+        "\000\000\001\001\000\rOban Disciple",
+        "\000\000\001\001\000\fOban Scholar",
+        "\000\000\001\001\000\vOban Sensei"
+    },
+    ["13"] = {
+        "\000\000\001\001\000\vLower Demon",
+        "\000\000\001\001\000\014Nakim Infinity",
+        "\000\000\001\001\000\014Kaiga Infinity",
+        "\000\000\001\001\000\fAka Infinity",
+        "\000\000\001\001\000\rDoma Infinity"
+    },
+    ["14"] = {
+        "\000\000\001\001\000\tLow Demon",
+        "\000\000\001\001\000\fLower Wraith",
+        "\000\000\001\001\000\vLower Ghoul",
+        "\000\000\001\001\000\tLower Oni",
+        "\000\000\001\001\000\rKaiga The Bum"
+    },
+    ["15"] = {
+        "\000\000\001\001\000\018Lower Demon Palace",
+        "\000\000\001\001\000\019Lower Wraith Palace",
+        "\000\000\001\001\000\018Lower Ghoul Palace",
+        "\000\000\001\001\000\016Lower Oni Palace",
+        "\000\000\001\001\000\nAka Palace"
+    },
+}
+local TOTAL_WORLD = 15
+
+-- ========== Prevent duplicate GUI ==========
+if CoreGui:FindFirstChild("InfinitySkillGUI") then
+    CoreGui:FindFirstChild("InfinitySkillGUI"):Destroy()
+end
+
+-- ========== GUI ==========
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "InfinitySkillGUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 320, 0, 160)
+Frame.Position = UDim2.new(0.5, -160, 0.45, -80)
+Frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
+
+local TitleBar = Instance.new("Frame", Frame)
+TitleBar.Size = UDim2.new(1,0,0,34)
+TitleBar.Position = UDim2.new(0,0,0,0)
+TitleBar.BackgroundColor3 = Color3.fromRGB(36,36,36)
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,8)
+
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1, -120, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Text = "⚔️ Infinity Skill (Switch World)"
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton", TitleBar)
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -36, 0, 3)
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextColor3 = Color3.new(1,1,1)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(165,60,60)
+CloseBtn.Parent = TitleBar
+
+-- Minimize Button
+local MiniBtn = Instance.new("TextButton", TitleBar)
+MiniBtn.Size = UDim2.new(0, 28, 0, 28)
+MiniBtn.Position = UDim2.new(1, -72, 0, 3)
+MiniBtn.Text = "-"
+MiniBtn.Font = Enum.Font.GothamBold
+MiniBtn.TextColor3 = Color3.new(1,1,1)
+MiniBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+MiniBtn.Parent = TitleBar
+
+-- Floating icon (shown when minimized)
+local MiniIcon = Instance.new("TextButton")
+MiniIcon.Size = UDim2.new(0, 44, 0, 44)
+MiniIcon.Position = UDim2.new(0.1, 0, 0.6, 0)
+MiniIcon.BackgroundColor3 = Color3.fromRGB(50,50,50)
+MiniIcon.Text = "⚔️"
+MiniIcon.Font = Enum.Font.GothamBold
+MiniIcon.TextSize = 22
+MiniIcon.TextColor3 = Color3.new(1,1,1)
+MiniIcon.Visible = false
+MiniIcon.Parent = ScreenGui
+Instance.new("UICorner", MiniIcon).CornerRadius = UDim.new(1,0)
+
+-- World switch UI
+local LeftBtn = Instance.new("TextButton", Frame)
+LeftBtn.Size = UDim2.new(0, 40, 0, 36)
+LeftBtn.Position = UDim2.new(0, 12, 0, 48)
+LeftBtn.Text = "◀"
+LeftBtn.Font = Enum.Font.GothamBold
+LeftBtn.TextSize = 20
+LeftBtn.TextColor3 = Color3.new(1,1,1)
+LeftBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+Instance.new("UICorner", LeftBtn).CornerRadius = UDim.new(0,6)
+
+local WorldLabel = Instance.new("TextLabel", Frame)
+WorldLabel.Size = UDim2.new(0, 180, 0, 36)
+WorldLabel.Position = UDim2.new(0, 60, 0, 48)
+WorldLabel.BackgroundColor3 = Color3.fromRGB(40,40,40)
+WorldLabel.Font = Enum.Font.GothamBold
+WorldLabel.TextSize = 16
+WorldLabel.TextColor3 = Color3.new(1,1,1)
+WorldLabel.Text = "World: 1"
+WorldLabel.AnchorPoint = Vector2.new(0,0)
+Instance.new("UICorner", WorldLabel).CornerRadius = UDim.new(0,6)
+
+local RightBtn = Instance.new("TextButton", Frame)
+RightBtn.Size = UDim2.new(0, 40, 0, 36)
+RightBtn.Position = UDim2.new(1, -52, 0, 48)
+RightBtn.Text = "▶"
+RightBtn.Font = Enum.Font.GothamBold
+RightBtn.TextSize = 20
+RightBtn.TextColor3 = Color3.new(1,1,1)
+RightBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+Instance.new("UICorner", RightBtn).CornerRadius = UDim.new(0,6)
+
+-- Toggle button
+local ToggleBtn = Instance.new("TextButton", Frame)
+ToggleBtn.Size = UDim2.new(1, -24, 0, 40)
+ToggleBtn.Position = UDim2.new(0, 12, 0, 108)
+ToggleBtn.Text = "Infinity: OFF"
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 16
+ToggleBtn.TextColor3 = Color3.new(1,1,1)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(160,50,50)
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,8)
+
+-- ========== State ==========
+local currentWorld = 1
+local enabled = false
+local minimized = false
+
+local function updateWorldLabel()
+    WorldLabel.Text = "World: " .. tostring(currentWorld)
+end
+
+-- Left / Right logic
+LeftBtn.MouseButton1Click:Connect(function()
+    currentWorld = currentWorld - 1
+    if currentWorld < 1 then currentWorld = TOTAL_WORLD end
+    updateWorldLabel()
+end)
+
+RightBtn.MouseButton1Click:Connect(function()
+    currentWorld = currentWorld + 1
+    if currentWorld > TOTAL_WORLD then currentWorld = 1 end
+    updateWorldLabel()
+end)
+
+-- Toggle logic (safe loop)
+local function loopSkills()
+    while enabled do
+        local list = WorldSkills[tostring(currentWorld)]
+        if list and #list > 0 then
+            for _, raw in ipairs(list) do
+                pcall(function()
+                    Mastery:FireServer("EnemyHit", "R", {raw})
+                    Mastery:FireServer("EnemyHit", "E", {raw})
+                    Mastery:FireServer("UseSkill", "Q", {raw})
+                end)
+                task.wait(0.01) -- slow-ish to avoid silent server rejection
+            end
+        else
+            task.wait(0.5) -- if no raw configured, wait longer
+        end
+        task.wait(0.01)
+    end
+end
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    ToggleBtn.Text = enabled and "Infinity: ON" or "Infinity: OFF"
+    ToggleBtn.BackgroundColor3 = enabled and Color3.fromRGB(50,170,50) or Color3.fromRGB(160,50,50)
+    if enabled then
+        task.spawn(loopSkills)
+    end
+end)
+
+-- Minimize (SAFE: only hide GuiObject children)
+MiniBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    for _, obj in ipairs(Frame:GetChildren()) do
+        if obj ~= TitleBar and obj:IsA("GuiObject") then
+            obj.Visible = not minimized
+        end
+    end
+    MiniIcon.Visible = minimized
+    Frame.Size = minimized and UDim2.new(0,320,0,34) or UDim2.new(0,320,0,160)
+end)
+
+-- Floating icon click restores
+MiniIcon.MouseButton1Click:Connect(function()
+    minimized = false
+    for _, obj in ipairs(Frame:GetChildren()) do
+        if obj:IsA("GuiObject") then obj.Visible = true end
+    end
+    MiniIcon.Visible = false
+    Frame.Size = UDim2.new(0,320,0,160)
+end)
+
+-- Close button
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- initial label
+updateWorldLabel()
+
+print("Infinity Skill (Switch World) loaded — use ◀ ▶ to change world, toggle to run.")
