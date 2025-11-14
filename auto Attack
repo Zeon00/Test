@@ -185,6 +185,13 @@ local worldData = {
 		"\000\000\001\001\000\014Kaiga Infinity",
 		"\000\000\001\001\000\fAka Infinity",
 		"\000\000\001\001\000\rDoma Infinity"
+	},
+    ["14"] = {
+		"\000\000\001\001\000\tLow Demon",
+		"\000\000\001\001\000\fLower Wraith",
+		"\000\000\001\001\000\vLower Ghoul",
+		"\000\000\001\001\000\tLower Oni",
+		"\000\000\001\001\000\rKaiga The Bum"
 	}
 }
 
@@ -223,7 +230,7 @@ toggleButton.MouseButton1Click:Connect(function()
 end)
 
 dropdown.MouseButton1Click:Connect(function()
-    local nextWorld = tostring((tonumber(selectedWorld) % 13) + 1)
+    local nextWorld = tostring((tonumber(selectedWorld) % 14) + 1)
     selectedWorld = nextWorld
     dropdown.Text = "Select World: " .. selectedWorld
 end)
