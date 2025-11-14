@@ -1,4 +1,5 @@
--- 📌 FULL AUTOCLICK + RECORD (PC & ANDROID SUPPORT)
+-- 📌 FULL AUTOCLICK (PC + ANDROID) — FINAL FIX VERSION
+
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local VIM = game:GetService("VirtualInputManager")
@@ -53,11 +54,11 @@ local MinCorner = Instance.new("UICorner")
 MinCorner.CornerRadius = UDim.new(0, 5)
 MinCorner.Parent = MinBtn
 
--- FIXED MINIMIZE ICON (SELALU MUNCUL)
+-- FIXED MINIMIZE ICON
 local Icon = Instance.new("TextButton")
 Icon.Visible = false
 Icon.Size = UDim2.new(0, 55, 0, 55)
-Icon.Position = UDim2.new(0, 20, 0.5, -30) -- selalu di kiri layar, aman
+Icon.Position = UDim2.new(0, 20, 0.5, -30)
 Icon.BackgroundColor3 = Color3.fromRGB(60, 60, 200)
 Icon.Text = "⚙"
 Icon.TextColor3 = Color3.new(1, 1, 1)
@@ -68,7 +69,6 @@ Icon.Parent = ScreenGui
 local IconCorner = Instance.new("UICorner")
 IconCorner.CornerRadius = UDim.new(1, 0)
 IconCorner.Parent = Icon
-
 
 -- Close Button
 local CloseBtn = Instance.new("TextButton")
@@ -85,11 +85,31 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 5)
 CloseCorner.Parent = CloseBtn
 
-CloseBtn.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
-end)
+---------------------------------------
+-- 🔥 PROTECT GUI FROM AUTOCLICK
+---------------------------------------
+local function isTouchOnGui()
+	local pos = UIS:GetMouseLocation()  -- PC + ANDROID compatible
+	local x, y = pos.X, pos.Y
 
--- Buttons
+	if Frame.Visible then
+		local fpos = Frame.AbsolutePosition
+		local fsize = Frame.AbsoluteSize
+
+		if x >= fpos.X and x <= fpos.X + fsize.X
+		and y >= fpos.Y and y <= fpos.Y + fsize.Y then
+			return true
+		end
+	end
+
+	return false
+end
+
+---------------------------------------
+-- RECORD BUTTON
+---------------------------------------
+local clickPos = nil
+
 local RecordBtn = Instance.new("TextButton")
 RecordBtn.Size = UDim2.new(0, 200, 0, 40)
 RecordBtn.Position = UDim2.new(0.5, -100, 0, 40)
@@ -103,6 +123,32 @@ RecordBtn.Parent = Frame
 local RCorner = Instance.new("UICorner")
 RCorner.CornerRadius = UDim.new(0, 8)
 RCorner.Parent = RecordBtn
+
+RecordBtn.MouseButton1Click:Connect(function()
+	RecordBtn.Text = "Tap Now..."
+
+	local conn
+	conn = UIS.InputBegan:Connect(function(input, gp)
+		if gp then return end
+		
+		if input.UserInputType == Enum.UserInputType.Touch 
+		or input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+			clickPos = Vector2.new(input.Position.X, input.Position.Y)
+			RecordBtn.Text = "🎯 Recorded!"
+			task.wait(0.5)
+			RecordBtn.Text = "🎯 Record Tap"
+
+			conn:Disconnect()
+		end
+	end)
+end)
+
+---------------------------------------
+-- AUTOCLICK BUTTON
+---------------------------------------
+local autoEnabled = false
+local autoThread = nil
 
 local AutoBtn = Instance.new("TextButton")
 AutoBtn.Size = UDim2.new(0, 200, 0, 40)
@@ -118,40 +164,6 @@ local ACorner = Instance.new("UICorner")
 ACorner.CornerRadius = UDim.new(0, 8)
 ACorner.Parent = AutoBtn
 
--- Logic Vars
-local clickPos = nil
-local autoEnabled = false
-local autoThread = nil
-
-------------------------------------------------------
--- 📌 RECORD TAP (PC + ANDROID)
-------------------------------------------------------
-RecordBtn.MouseButton1Click:Connect(function()
-	RecordBtn.Text = "Tap Now..."
-	print("📌 Tap/Click anywhere to record position")
-
-	local conn
-	conn = UIS.InputBegan:Connect(function(input, gp)
-		if gp then return end
-
-		if input.UserInputType == Enum.UserInputType.Touch 
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-			clickPos = Vector2.new(input.Position.X, input.Position.Y)
-			print("✅ RECORDED AT:", clickPos)
-
-			RecordBtn.Text = "🎯 Recorded!"
-			task.wait(0.5)
-			RecordBtn.Text = "🎯 Record Tap"
-
-			conn:Disconnect()
-		end
-	end)
-end)
-
-------------------------------------------------------
--- 📌 AUTO CLICK LOOP
-------------------------------------------------------
 AutoBtn.MouseButton1Click:Connect(function()
 	autoEnabled = not autoEnabled
 	AutoBtn.Text = "Auto Click: " .. (autoEnabled and "ON" or "OFF")
@@ -160,10 +172,13 @@ AutoBtn.MouseButton1Click:Connect(function()
 	if autoEnabled then
 		autoThread = task.spawn(function()
 			while autoEnabled do
-				if clickPos then
+
+				-- ❗ Jangan tembak click kalau GUI disentuh
+				if not isTouchOnGui() and clickPos then
 					VIM:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, true, game, 1)
 					VIM:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, false, game, 1)
 				end
+
 				task.wait(0.08)
 			end
 		end)
@@ -175,9 +190,9 @@ AutoBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-------------------------------------------------------
--- 📌 MINIMIZE
-------------------------------------------------------
+---------------------------------------
+-- MINIMIZE
+---------------------------------------
 MinBtn.MouseButton1Click:Connect(function()
 	Frame.Visible = false
 	Icon.Visible = true
@@ -186,4 +201,13 @@ end)
 Icon.MouseButton1Click:Connect(function()
 	Frame.Visible = true
 	Icon.Visible = false
+end)
+
+---------------------------------------
+-- CLOSE = STOP AUTOCLICK + REMOVE GUI
+---------------------------------------
+CloseBtn.MouseButton1Click:Connect(function()
+	autoEnabled = false
+	if autoThread then task.cancel(autoThread) end
+	ScreenGui:Destroy()
 end)
