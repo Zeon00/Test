@@ -112,8 +112,15 @@ local WorldSkills = {
         "\000\000\001\001\000\016Lower Oni Palace",
         "\000\000\001\001\000\nAka Palace"
     },
+    ["16"] = {
+		"\000\000\001\001\000\020Lower Demon Fortress",
+		"\000\000\001\001\000\021Lower Wraith Fortress",
+		"\000\000\001\001\000\020Lower Ghoul Fortress",
+		"\000\000\001\001\000\018Lower Oni Fortress",
+		"\000\000\001\001\000\020Lower Ghoul Fortress"
+    },
 }
-local TOTAL_WORLD = 15
+local TOTAL_WORLD = 16
 
 -- ========== Prevent duplicate GUI ==========
 if CoreGui:FindFirstChild("InfinitySkillGUI") then
