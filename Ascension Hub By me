@@ -37,6 +37,12 @@ local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/As
 end})
 GUI:CreateButton({
     parent = main, 
+    text = "Auto Roll Wave", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Roll%20Wave"))()
+end})
+GUI:CreateButton({
+    parent = main, 
     text = "Anti AFK", 
     callback = function()
 local VirtualUser = game:GetService('VirtualUser')
