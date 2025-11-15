@@ -1,0 +1,86 @@
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create main GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RollGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+-- Main frame
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 250)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -125)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Parent = ScreenGui
+
+-- Destroy button
+local DestroyBtn = Instance.new("TextButton")
+DestroyBtn.Size = UDim2.new(0, 30, 0, 30)
+DestroyBtn.Position = UDim2.new(1, -35, 0, 5)
+DestroyBtn.Text = "X"
+DestroyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+DestroyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DestroyBtn.Parent = Frame
+
+DestroyBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Minimize button
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 5)
+MinimizeBtn.Text = "-"
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.Parent = Frame
+
+local minimized = false
+local originalSize = Frame.Size
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        Frame.Size = UDim2.new(Frame.Size.X.Scale, Frame.Size.X.Offset, 0, 40)
+    else
+        Frame.Size = originalSize
+    end
+end)
+
+-- Table untuk rolls
+local rolls = {"Strength", "Damage", "Coins", "CritDamage", "CritChance", "Health"}
+local yPos = 40
+
+for _, roll in ipairs(rolls) do
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, 180, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, yPos)
+    Button.Text = roll
+    Button.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- OFF merah
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Parent = Frame
+
+    local active = false
+
+    Button.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            Button.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- ON hijau
+            spawn(function()
+                while active do
+                    local args = {"Roll", roll}
+                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wave"):FireServer(unpack(args))
+                    wait(0.1) -- delay
+                end
+            end)
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- OFF merah
+        end
+    end)
+
+    yPos = yPos + 35
+end
