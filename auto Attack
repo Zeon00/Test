@@ -6,11 +6,14 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- // Remote
+-- // Remote Attack
 local Remote = ReplicatedStorage:WaitForChild("Modules")
     :WaitForChild("Network")
     :WaitForChild("Network")
     :WaitForChild("RemoteEvent")
+
+-- // Remote StartFight
+local Combat = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Combat")
 
 -- // GUI Setup
 local screenGui = Instance.new("ScreenGui", playerGui)
@@ -75,17 +78,55 @@ minimizeBtn.MouseButton1Click:Connect(function()
     frame.Size = minimized and UDim2.new(0, 200, 0, 26) or UDim2.new(0, 200, 0, 170)
 end)
 
--- // BUTTON ATTACK ON/OFF
+-----------------------------------------------------------------------
+-- // START FIGHT BUTTON (POSISI 1)
+-----------------------------------------------------------------------
+local startBtn = Instance.new("TextButton", frame)
+startBtn.Size = UDim2.new(1, -20, 0, 32)
+startBtn.Position = UDim2.new(0, 10, 0, 34)
+startBtn.Text = "StartFight: OFF"
+startBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+startBtn.TextColor3 = Color3.new(1, 1, 1)
+startBtn.Font = Enum.Font.Gotham
+startBtn.TextSize = 14
+
+local sfRunning = false
+
+startBtn.MouseButton1Click:Connect(function()
+    sfRunning = not sfRunning
+
+    if sfRunning then
+        startBtn.Text = "StartFight: ON"
+        startBtn.BackgroundColor3 = Color3.fromRGB(50, 170, 50)
+
+        task.spawn(function()
+            while sfRunning do
+                Combat:FireServer("StartFight")
+                task.wait(1)
+            end
+        end)
+
+    else
+        startBtn.Text = "StartFight: OFF"
+        startBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+    end
+end)
+
+-----------------------------------------------------------------------
+-- // BUTTON AUTO ATTACK (POSISI 2)
+-----------------------------------------------------------------------
 local toggleButton = Instance.new("TextButton", frame)
 toggleButton.Size = UDim2.new(1, -20, 0, 32)
-toggleButton.Position = UDim2.new(0, 10, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0, 74)
 toggleButton.Text = "OFF"
 toggleButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
 toggleButton.Font = Enum.Font.Gotham
 toggleButton.TextSize = 14
 
--- // WORLD DATA (same as your list)
+-----------------------------------------------------------------------
+-- // WORLD DATA (PUNYA KAMU — TIDAK DIUBAH)
+-----------------------------------------------------------------------
 local worldData = {
     ["1"] = {
         "\000\000\001\001\000\004Monk",
@@ -201,7 +242,9 @@ local worldData = {
     }
 }
 
--- // AUTO ATTACK LOGIC
+-----------------------------------------------------------------------
+-- // AUTO ATTACK LOGIC (TIDAK DIUBAH)
+-----------------------------------------------------------------------
 local selectedWorld = "1"
 local attackRunning = false
 
@@ -239,10 +282,12 @@ toggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- // SWITCH WORLD (◀ ▶)
+-----------------------------------------------------------------------
+-- // SWITCH WORLD (TIDAK DIUBAH)
+-----------------------------------------------------------------------
 local switchLabel = Instance.new("TextLabel", frame)
 switchLabel.Size = UDim2.new(1, -20, 0, 28)
-switchLabel.Position = UDim2.new(0, 10, 0, 84)
+switchLabel.Position = UDim2.new(0, 10, 0, 112)
 switchLabel.BackgroundTransparency = 1
 switchLabel.Text = "Switch World (Loaded)"
 switchLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -251,7 +296,7 @@ switchLabel.TextSize = 14
 
 local worldDisplay = Instance.new("TextLabel", frame)
 worldDisplay.Size = UDim2.new(1, -20, 0, 28)
-worldDisplay.Position = UDim2.new(0, 10, 0, 112)
+worldDisplay.Position = UDim2.new(0, 10, 0, 140)
 worldDisplay.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 worldDisplay.TextColor3 = Color3.new(1, 1, 1)
 worldDisplay.Font = Enum.Font.Gotham
@@ -260,7 +305,7 @@ worldDisplay.Text = "World: 1"
 
 local leftBtn = Instance.new("TextButton", frame)
 leftBtn.Size = UDim2.new(0, 28, 0, 28)
-leftBtn.Position = UDim2.new(0, 10, 0, 112)
+leftBtn.Position = UDim2.new(0, 10, 0, 140)
 leftBtn.Text = "◀"
 leftBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 leftBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -269,7 +314,7 @@ leftBtn.TextSize = 14
 
 local rightBtn = Instance.new("TextButton", frame)
 rightBtn.Size = UDim2.new(0, 28, 0, 28)
-rightBtn.Position = UDim2.new(1, -38, 0, 112)
+rightBtn.Position = UDim2.new(1, -38, 0, 140)
 rightBtn.Text = "▶"
 rightBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 rightBtn.TextColor3 = Color3.new(1, 1, 1)
