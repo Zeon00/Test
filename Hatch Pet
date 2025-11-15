@@ -143,15 +143,15 @@ Btn1.MouseButton1Click:Connect(function()
 		loop1 = task.spawn(function()
 			while toggle1 do
 				local args = {
-				{
-					{
-						"\001",
-						"r\020\213\178\239CE\159\145r\195\219\226A\192\229",
-						"E43"
-					},
-						"\004"
-					}
-				}
+	{
+		{
+			"\001",
+			"@o\234\189w\245K'\162/\239N\154Yp\245",
+			"E48"
+		},
+		"\004"
+	}
+}
 				ReplicatedStorage.BridgeNet.dataRemoteEvent:FireServer(unpack(args))
 				task.wait(0.1)
 			end
