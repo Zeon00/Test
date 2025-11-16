@@ -450,7 +450,8 @@ local worldData = {
        "\000\000\001\001\000\021Lower Wraith Infinite",
 		"\000\000\001\001\000\020Lower Demon Infinite",
     	"\000\000\001\001\000\020Lower Ghoul Infinite",
-    	"\000\000\001\001\000\018Lower Oni Infinite"
+    	"\000\000\001\001\000\018Lower Oni Infinite",
+		"\000\000\001\001\000\rKoku Infinite"
 	}-- (isi sama persis dari script kamu sebelumnya)
 }
 
