@@ -329,6 +329,12 @@ local worldData = {
         "\000\000\001\001\000\022Lower Ghoul Stronghold",
         "\000\000\001\001\000\020Lower Oni Stronghold",
         "\000\000\001\001\000\016Nakim Stronghold"
+	 },
+    ["18"] = {
+       "\000\000\001\001\000\021Lower Wraith Infinite",
+		"\000\000\001\001\000\020Lower Demon Infinite",
+    	"\000\000\001\001\000\020Lower Ghoul Infinite",
+    	"\000\000\001\001\000\018Lower Oni Infinite"
 	}-- (isi sama persis dari script kamu sebelumnya)
 }
 
@@ -403,7 +409,7 @@ right.TextColor3 = Color3.new(1,1,1)
 right.Font = Enum.Font.GothamBold
 right.TextSize = 14
 
-local MAX_WORLD = 17
+local MAX_WORLD = 18
 
 local function updateWorld()
     worldDisplay.Text = "World: " .. selectedWorld
