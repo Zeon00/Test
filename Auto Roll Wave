@@ -1,86 +1,163 @@
--- Services
+--=====================================================
+-- BEAUTIFUL MODERN GUI
+--=====================================================
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Create main GUI
+-- CLEAR OLD GUI
+if PlayerGui:FindFirstChild("RollGUI") then
+	PlayerGui.RollGUI:Destroy()
+end
+
+-- Main GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "RollGUI"
-ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
 
 -- Main frame
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 200, 0, 250)
-Frame.Position = UDim2.new(0.5, -100, 0.5, -125)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Size = UDim2.new(0, 230, 0, 300)
+Frame.Position = UDim2.new(0.5, -115, 0.45, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
--- Destroy button
-local DestroyBtn = Instance.new("TextButton")
-DestroyBtn.Size = UDim2.new(0, 30, 0, 30)
+-- Rounded corners
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- Shadow effect
+local Shadow = Instance.new("ImageLabel", Frame)
+Shadow.ZIndex = -1
+Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+Shadow.Size = UDim2.new(1, 40, 1, 40)
+Shadow.Image = "rbxassetid://6015897843"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.45
+Shadow.BackgroundTransparency = 1
+
+-- Title bar
+local TitleBar = Instance.new("Frame", Frame)
+TitleBar.Size = UDim2.new(1, 0, 0, 38)
+TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,12)
+
+-- Title text
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1, -70, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ Auto Roll"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextColor3 = Color3.fromRGB(200,200,200)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Destroy button (X)
+local DestroyBtn = Instance.new("TextButton", TitleBar)
+DestroyBtn.Size = UDim2.new(0, 30, 0, 28)
 DestroyBtn.Position = UDim2.new(1, -35, 0, 5)
 DestroyBtn.Text = "X"
-DestroyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+DestroyBtn.Font = Enum.Font.GothamBold
 DestroyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-DestroyBtn.Parent = Frame
+DestroyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+Instance.new("UICorner", DestroyBtn).CornerRadius = UDim.new(0,6)
 
 DestroyBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+	ScreenGui:Destroy()
 end)
 
--- Minimize button
-local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-MinimizeBtn.Position = UDim2.new(1, -70, 0, 5)
-MinimizeBtn.Text = "-"
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.Parent = Frame
+-- Minimize (-)
+local MinBtn = Instance.new("TextButton", TitleBar)
+MinBtn.Size = UDim2.new(0, 30, 0, 28)
+MinBtn.Position = UDim2.new(1, -70, 0, 5)
+MinBtn.Text = "-"
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0,6)
 
 local minimized = false
 local originalSize = Frame.Size
 
-MinimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Frame.Size = UDim2.new(Frame.Size.X.Scale, Frame.Size.X.Offset, 0, 40)
-    else
-        Frame.Size = originalSize
-    end
+MinBtn.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	if minimized then
+		Frame.Size = UDim2.new(0, 230, 0, 40)
+		for _,obj in pairs(Frame:GetChildren()) do
+			if obj ~= TitleBar and obj:IsA("GuiObject") then
+				obj.Visible = false
+			end
+		end
+	else
+		Frame.Size = originalSize
+		for _,obj in pairs(Frame:GetChildren()) do
+			obj.Visible = true
+		end
+	end
 end)
 
--- Table untuk rolls
+-- DRAG
+local dragging, dragStart, startPos
+TitleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Frame.Position
+	end
+end)
+TitleBar.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+TitleBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- Roll options
 local rolls = {"Strength", "Damage", "Coins", "CritDamage", "CritChance", "Health"}
-local yPos = 40
+local y = 50
 
 for _, roll in ipairs(rolls) do
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 180, 0, 30)
-    Button.Position = UDim2.new(0, 10, 0, yPos)
-    Button.Text = roll
-    Button.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- OFF merah
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Parent = Frame
 
-    local active = false
+	local Btn = Instance.new("TextButton", Frame)
+	Btn.Size = UDim2.new(0, 200, 0, 32)
+	Btn.Position = UDim2.new(0, 15, 0, y)
+	Btn.Text = roll
+	Btn.BackgroundColor3 = Color3.fromRGB(90, 20, 20)
+	Btn.TextColor3 = Color3.new(1,1,1)
+	Btn.Font = Enum.Font.GothamBold
+	Btn.TextSize = 15
+	Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
 
-    Button.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
-            Button.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- ON hijau
-            spawn(function()
-                while active do
-                    local args = {"Roll", roll}
-                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wave"):FireServer(unpack(args))
-                    wait(0.1) -- delay
-                end
-            end)
-        else
-            Button.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- OFF merah
-        end
-    end)
+	local active = false
 
-    yPos = yPos + 35
+	Btn.MouseButton1Click:Connect(function()
+		active = not active
+
+		if active then
+			Btn.BackgroundColor3 = Color3.fromRGB(30, 150, 80)
+
+			task.spawn(function()
+				while active do
+					ReplicatedStorage.Remotes.Wave:FireServer("Roll", roll)
+					task.wait(0.1)
+				end
+			end)
+
+		else
+			Btn.BackgroundColor3 = Color3.fromRGB(90, 20, 20)
+		end
+	end)
+
+	y += 38
 end
