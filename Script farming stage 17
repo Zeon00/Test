@@ -92,6 +92,58 @@ end
 local function autoRelog()
     TeleportService:Teleport(126991914853936, player)
 end
+---------------------------------------------------------------------
+-- AUTO BEHIND (TOGGLE VERSION)
+---------------------------------------------------------------------
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local behindDistance = 4
+
+local behindConnection = nil
+
+local function autoBehind(on)
+    if not on then
+        if behindConnection then
+            behindConnection:Disconnect()
+            behindConnection = nil
+        end
+        return
+    end
+
+    -- Start loop
+    behindConnection = RunService.Heartbeat:Connect(function()
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        local hrp = char.HumanoidRootPart
+
+        local enemiesFolder = Workspace:FindFirstChild("Client")
+            and Workspace.Client:FindFirstChild("Enemies")
+        if not enemiesFolder then return end
+
+        local closestEnemy, closestDist
+        for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+            local hrp2 = enemy:FindFirstChild("HumanoidRootPart")
+            local hum = enemy:FindFirstChild("Humanoid")
+            if hrp2 and hum and hum.Health > 0 then
+                local dist = (hrp2.Position - hrp.Position).Magnitude
+                if not closestDist or dist < closestDist then
+                    closestDist = dist
+                    closestEnemy = enemy
+                end
+            end
+        end
+
+        if closestEnemy then
+            local eHRP = closestEnemy.HumanoidRootPart
+            local behindPos = eHRP.Position - (eHRP.CFrame.LookVector * behindDistance)
+            hrp.CFrame = CFrame.new(behindPos + Vector3.new(0,2,0), eHRP.Position)
+        end
+    end)
+end
 
 ---------------------------------------------------------------------
 -- CREATE BUTTONS & AUTO ON LOGIC
@@ -158,6 +210,9 @@ createToggleButton("Auto Relog", function()      -- delay 1 jam 5 menit
         task.wait(3900)
         autoRelog()
     end)
+end, true)
+createToggleButton("Auto Behind", function()
+    autoBehind(true)
 end, true)
 
 print("✔ All toggles set — Travel/AntiAFK 1x, Buffers/StartFight/Training loop, PT & Relog delayed")
