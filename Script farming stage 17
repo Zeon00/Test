@@ -1,255 +1,120 @@
----------------------------------------------------------------------
--- ULTRA MODERN 7-TOGGLE AUTO SYSTEM GUI (DELTA SAFE FULL)
----------------------------------------------------------------------
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
 
-local Players = game:GetService("Players")
+GUI:CreateMain({
+    Name = "Ashlabs",
+    title = "Arm Wrestle Simulator",
+    ToggleUI = "K",
+    WindowIcon = "home"
+})
+
+local main = GUI:CreateTab("Main", "user-round")
+GUI:CreateSection({ parent = main, text = "Player" })
+
+---------------------------------------------------------------------
+-- FUNGSI MODULAR DENGAN TOGGLE STATE
+---------------------------------------------------------------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local VirtualUser = game:GetService("VirtualUser")
+local Players = game:GetService("Players")
 
--- Tunggu LocalPlayer siap
 local player = Players.LocalPlayer
 while not player do task.wait() end
-local playerGui = player:WaitForChild("PlayerGui")
 
----------------------------------------------------------------------
--- GUI BASE
----------------------------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AutoSystemGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.Parent = playerGui
+-- Table untuk menyimpan state toggle
+local togglesState = {}
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0,260,0,360)
-MainFrame.Position = UDim2.new(0,40,0,80)
-MainFrame.BackgroundColor3 = Color3.fromRGB(28,28,28)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.ClipsDescendants = true
-MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
+local function createToggleLoop(name, loopFunc)
+    togglesState[name] = false
+    GUI:CreateButton({
+        parent = main,
+        text = name .. " : OFF",
+        callback = function()
+            togglesState[name] = not togglesState[name]
+            local btn = GUI:GetButton(name) -- asumsi Ash Lib punya get button by name
+            if btn then
+                btn.Text = name .. (togglesState[name] and " : ON" or " : OFF")
+            end
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1,-80,0,30)
-Title.Position = UDim2.new(0,10,0,5)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.Text = "[ AUTO SYSTEM ]"
-Title.TextColor3 = Color3.fromRGB(255,255,255)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = MainFrame
-
--- Mini Icon
-local MiniIcon = Instance.new("TextLabel")
-MiniIcon.Size = UDim2.new(0,50,0,30)
-MiniIcon.Position = UDim2.new(0,40,0,80)
-MiniIcon.BackgroundColor3 = Color3.fromRGB(50,50,50)
-MiniIcon.Text = "AS"
-MiniIcon.TextColor3 = Color3.new(1,1,1)
-MiniIcon.Visible = false
-MiniIcon.Active = true
-MiniIcon.Draggable = true
-MiniIcon.Parent = ScreenGui
-
--- Minimize & Close
-local MinBtn = Instance.new("TextButton")
-MinBtn.Size = UDim2.new(0,25,0,25)
-MinBtn.Position = UDim2.new(1,-55,0,5)
-MinBtn.BackgroundTransparency = 1
-MinBtn.Text = "-"
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 28
-MinBtn.TextColor3 = Color3.fromRGB(255,255,255)
-MinBtn.Parent = MainFrame
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0,25,0,25)
-CloseBtn.Position = UDim2.new(1,-25,0,5)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.Text = "X"
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 22
-CloseBtn.TextColor3 = Color3.fromRGB(255,80,80)
-CloseBtn.Parent = MainFrame
-
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
-local minimized = false
-MinBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    MainFrame.Size = minimized and UDim2.new(0,260,0,40) or UDim2.new(0,260,0,360)
-    MiniIcon.Visible = minimized
-end)
-
-MiniIcon.MouseButton1Click:Connect(function()
-    minimized = false
-    MainFrame.Size = UDim2.new(0,260,0,360)
-    MiniIcon.Visible = false
-end)
-
----------------------------------------------------------------------
--- UNIVERSAL TOGGLE MAKER
----------------------------------------------------------------------
-local function makeToggle(name, order, callback)
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1,-20,0,32)
-    Btn.Position = UDim2.new(0,10,0,40 + (order*36))
-    Btn.BackgroundColor3 = Color3.fromRGB(180,50,50)
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 16
-    Btn.TextColor3 = Color3.new(1,1,1)
-    Btn.Text = name..": OFF"
-    Btn.Parent = MainFrame
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
-
-    local state = {value=false}
-    Btn.MouseButton1Click:Connect(function()
-        state.value = not state.value
-        Btn.Text = name..": "..(state.value and "ON" or "OFF")
-        Btn.BackgroundColor3 = state.value and Color3.fromRGB(50,180,70) or Color3.fromRGB(180,50,50)
-        callback(state)
-    end)
-
-    local function setState(newState)
-        state.value = newState
-        Btn.Text = name..": "..(state.value and "ON" or "OFF")
-        Btn.BackgroundColor3 = state.value and Color3.fromRGB(50,180,70) or Color3.fromRGB(180,50,50)
-        callback(state)
-    end
-
-    return setState
+            if togglesState[name] then
+                task.spawn(function()
+                    while togglesState[name] do
+                        loopFunc()
+                        task.wait()
+                    end
+                end)
+            end
+        end
+    })
 end
 
 ---------------------------------------------------------------------
--- TOGGLES
+-- LOOP FUNCTIONS
 ---------------------------------------------------------------------
+local function travelLoop()
+    local args = {"Travel", "World17"}
+    ReplicatedStorage.Remotes.Game:FireServer(unpack(args))
+end
 
--- 1 Travel
-local setTravel = makeToggle("Travel", 0, function(state)
-    if not state.value then return end
-    local rem = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("Game")
-    if rem then rem:FireServer("Travel","World17") end
-end)
-
--- 2 Buffers
-local setBuffers = makeToggle("Buffers",1,function(state)
-    if not state.value then return end
-    local netMod = ReplicatedStorage.Modules:FindFirstChild("Network")
-    local net = netMod and netMod:FindFirstChild("Network")
-    local evt = net and net:FindFirstChild("RemoteEvent")
-    if evt then
-        local RAW_LIST = { 
+local RAW_LIST={
     "\000\000\001\001\000\022Lower Demon Stronghold",
     "\000\000\001\001\000\023Lower Wraith Stronghold",
     "\000\000\001\001\000\022Lower Ghoul Stronghold",
     "\000\000\001\001\000\020Lower Oni Stronghold",
     "\000\000\001\001\000\016Nakim Stronghold"
 }
-        local NUM_ARGS = 8
-        local function makeBuffer(raw)
-            local ok,res = pcall(function() return buffer.fromstring(raw) end)
-            return ok and res or nil
-        end
-        local function buildArgs(raw)
-            local args = {}
-            for i=1,NUM_ARGS do table.insert(args, makeBuffer(raw)) end
-            return args
-        end
-        task.spawn(function()
-            while state.value do
-                for _,raw in ipairs(RAW_LIST) do
-                    evt:FireServer(unpack(buildArgs(raw)))
-                end
-                task.wait()
-            end
-        end)
+local NUM_ARGS = 8
+local RemoteEvent = ReplicatedStorage.Modules.Network.Network:WaitForChild("RemoteEvent")
+local function buildArgs(raw)
+    local args={}
+    for i=1,NUM_ARGS do
+        local ok,res = pcall(function() return buffer.fromstring(raw) end)
+        table.insert(args, ok and res or nil)
     end
-end)
+    return args
+end
+local function buffersLoop()
+    for _,raw in ipairs(RAW_LIST) do
+        RemoteEvent:FireServer(unpack(buildArgs(raw)))
+    end
+end
 
--- 3 Start Fight
-local setStartFight = makeToggle("StartFight",2,function(state)
-    if not state.value then return end
-    task.spawn(function()
-        while state.value do
-            local rem = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("Combat")
-            if rem then rem:FireServer("StartFight") end
-            task.wait(0.15)
-        end
-    end)
-end)
+local function startFightLoop()
+    ReplicatedStorage.Remotes.Combat:FireServer("StartFight")
+end
 
--- 4 Auto Training (Hyper RAW)
-local setHyperRAW = makeToggle("Auto Training",3,function(state)
-    if not state.value then return end
-    task.spawn(function()
-        local netMod = ReplicatedStorage.Modules:FindFirstChild("Network")
-        local net = netMod and netMod:FindFirstChild("Network")
-        local evt = net and net:FindFirstChild("RemoteEvent")
-        while state.value and evt do
-            local ok,res = pcall(function() return buffer.fromstring("\0\3VIP") end)
-            if ok then evt:FireServer(res) end
-            task.wait()
-        end
-    end)
-end)
+local function hyperRAWLoop()
+    local args={buffer.fromstring("\000\003VIP")}
+    ReplicatedStorage.Modules.Network.Network:WaitForChild("RemoteEvent"):FireServer(unpack(args))
+end
 
--- 5 Anti AFK
-local setAntiAFK = makeToggle("Anti AFK",4,function(state)
-    if not state.value then return end
-    task.spawn(function()
-        while state.value do
-            task.wait(60)
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-        end
-    end)
-end)
+local function antiAFKLoop()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+end
 
--- 6 PT Loop
-local setPT = makeToggle("PT Loop",5,function(state)
-    if not state.value then return end
-    task.spawn(function()
-        while state.value do
-            for i=1,10 do
-                if i ~= 3 then
-                    local rem = ReplicatedStorage:FindFirstChild("BridgeNet") 
-                    and ReplicatedStorage.BridgeNet:FindFirstChild("dataRemoteEvent")
-                    if rem then
-                        rem:FireServer({{{"PT",tostring(i)},"\6"}})
-                    end
-                end
-            end
-            task.wait(3600)
+local function ptLoopLoop()
+    for i=1,10 do
+        if i ~= 3 then
+            local args={{{"PT",tostring(i)},"\006"}}
+            ReplicatedStorage.BridgeNet.dataRemoteEvent:FireServer(unpack(args))
         end
-    end)
-end)
+    end
+end
 
--- 7 Auto Relog
-local setRelog = makeToggle("Auto Relog",6,function(state)
-    if not state.value then return end
-    task.spawn(function()
-        while state.value do
-            task.wait(3900)
-            TeleportService:Teleport(126991914853936,player)
-        end
-    end)
-end)
+local function autoRelogLoop()
+    TeleportService:Teleport(126991914853936, player)
+end
 
 ---------------------------------------------------------------------
--- AUTO ON
+-- BUAT SEMUA TOGGLE
 ---------------------------------------------------------------------
-task.spawn(function()
-    setTravel(true)
-    setBuffers(true)
-    setStartFight(true)
-    setHyperRAW(true)
-    setAntiAFK(true)
-    setPT(true)
-    setRelog(true)
-end)
+createToggleLoop("Travel", travelLoop)
+createToggleLoop("Buffers", buffersLoop)
+createToggleLoop("Start Fight", startFightLoop)
+createToggleLoop("Auto Training", hyperRAWLoop)
+createToggleLoop("Anti AFK", antiAFKLoop)
+createToggleLoop("PT Loop", ptLoopLoop)
+createToggleLoop("Auto Relog", autoRelogLoop)
 
-print("✔ Delta GUI Loaded — Semua toggle muncul, loops stop saat OFF")
+print("✔ All toggles ready — ON/OFF version")
