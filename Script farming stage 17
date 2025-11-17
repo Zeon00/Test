@@ -24,11 +24,11 @@ while not player do task.wait() end
 local RemoteEvent = ReplicatedStorage.Modules.Network.Network:WaitForChild("RemoteEvent")
 local NUM_ARGS = 8
 local RAW_LIST={
-    "\000\000\001\001\000\021Lower Wraith Infinite",
-	"\000\000\001\001\000\020Lower Demon Infinite",
-    "\000\000\001\001\000\020Lower Ghoul Infinite",
-    "\000\000\001\001\000\018Lower Oni Infinite",
-	"\000\000\001\001\000\rKoku Infinite"
+        "\000\000\001\001\000\020Lower Demon Fortress",
+        "\000\000\001\001\000\021Lower Wraith Fortress",
+        "\000\000\001\001\000\020Lower Ghoul Fortress",
+        "\000\000\001\001\000\018Lower Oni Fortress",
+        "\000\000\001\001\000\017Ice Doma Fortress""
 }
 
 local function makeBuffer(raw)
@@ -50,7 +50,7 @@ end
 
 -- Travel 1x
 local function travel()
-    local args = {"Travel", "World18"}
+    local args = {"Travel", "World16"}
     ReplicatedStorage.Remotes.Game:FireServer(unpack(args))
 end
 
