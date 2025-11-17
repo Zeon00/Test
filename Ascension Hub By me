@@ -44,12 +44,7 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Click"))()
 end})
-GUI:CreateButton({
-    parent = main, 
-    text = "Auto Roll Wave", 
-    callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Roll%20Wave"))()
-end})
+
 GUI:CreateButton({
     parent = main, 
     text = "Anti AFK", 
@@ -106,12 +101,7 @@ GUI:CreateSection({
     parent = main, 
     text = "Support Battle"
         })
-GUI:CreateButton({
-    parent = main, 
-    text = "Auto Roll World Buff", 
-    callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auro%20Roll%20World%20Buff"))()
-end})
+
 GUI:CreateButton({
     parent = main, 
     text = "Auto infinity Tower", 
@@ -135,4 +125,27 @@ GUI:CreateButton({
     text = "Auto Skill World Enemy", 
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Skill%20World"))()
+end})
+local main = GUI:CreateTab("Roll System", "squircle") -- You can use IconID we didnt impleemnt lucid or any external icons
+GUI:CreateSection({
+    parent = main, 
+    text = "Option"
+})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Roll Wave", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Roll%20Wave"))()
+end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Roll World Buff", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auro%20Roll%20World%20Buff"))()
+end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Roll Mark", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Roll%20Mark"))()
 end})
