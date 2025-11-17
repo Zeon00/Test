@@ -28,7 +28,7 @@ local RAW_LIST={
         "\000\000\001\001\000\021Lower Wraith Fortress",
         "\000\000\001\001\000\020Lower Ghoul Fortress",
         "\000\000\001\001\000\018Lower Oni Fortress",
-        "\000\000\001\001\000\017Ice Doma Fortress""
+        "\000\000\001\001\000\017Ice Doma Fortress"
 }
 
 local function makeBuffer(raw)
