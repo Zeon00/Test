@@ -19,53 +19,56 @@ local VirtualUser = game:GetService("VirtualUser")
 local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
+while not player do task.wait() end
 
 local RemoteEvent = ReplicatedStorage.Modules.Network.Network:WaitForChild("RemoteEvent")
 local NUM_ARGS = 8
-
-local RAW_LIST = {
-	"\000\000\001\001\000\0011",
-    "\000\000\001\001\000\0012",
-    "\000\000\001\001\000\0013",
-    "\000\000\001\001\000\0014",
-    "\000\000\001\001\000\0015",
-    "\000\000\001\001\000\0016",
-    "\000\000\001\001\000\0017",
-    "\000\000\001\001\000\0018"
+local RAW_LIST={
+        "\000\000\001\001\000\020Lower Demon Fortress",
+        "\000\000\001\001\000\021Lower Wraith Fortress",
+        "\000\000\001\001\000\020Lower Ghoul Fortress",
+        "\000\000\001\001\000\018Lower Oni Fortress",
+        "\000\000\001\001\000\017Ice Doma Fortress"
 }
 
 local function makeBuffer(raw)
-    local ok, res = pcall(function() return buffer.fromstring(raw) end)
+    local ok,res = pcall(function() return buffer.fromstring(raw) end)
     return ok and res or nil
 end
 
 local function buildArgs(raw)
-    local args = {}
-    for i = 1, NUM_ARGS do
+    local args={}
+    for i=1,NUM_ARGS do
         table.insert(args, makeBuffer(raw))
     end
     return args
 end
 
 ---------------------------------------------------------------------
--- FUNCTIONS
+-- TOGGLE LOOP / FUNCTIONS
 ---------------------------------------------------------------------
+
+-- Travel 1x
+local function travel()
+    local args = {"Travel", "World16"}
+    ReplicatedStorage.Remotes.Game:FireServer(unpack(args))
+end
 
 -- Buffers loop
 local function buffersLoop()
-    for _, raw in ipairs(RAW_LIST) do
+    for _,raw in ipairs(RAW_LIST) do
         RemoteEvent:FireServer(unpack(buildArgs(raw)))
     end
 end
 
--- NEW: Start Impossible loop
-local function startImpossibleLoop()
-    ReplicatedStorage.Remotes.Combat:FireServer("StartImpossible")
+-- Start Fight loop
+local function startFightLoop()
+    ReplicatedStorage.Remotes.Combat:FireServer("StartFight")
 end
 
 -- Auto Training loop
 local function hyperRAWLoop()
-    local args = { buffer.fromstring("\000\003VIP") }
+    local args = {buffer.fromstring("\000\003VIP")}
     RemoteEvent:FireServer(unpack(args))
 end
 
@@ -77,26 +80,76 @@ end
 
 -- PT Loop 1x after 1 hour
 local function ptLoop()
-    for i = 1, 10 do
+    for i=1,10 do
         if i ~= 3 then
-            local args = { { { "PT", tostring(i) }, "\006" } }
+            local args={{{"PT",tostring(i)},"\006"}}
             ReplicatedStorage.BridgeNet.dataRemoteEvent:FireServer(unpack(args))
         end
     end
 end
 
--- Auto Relog after 1 hour 5 mins
+-- Auto Relog 1x after 1 hour 5 mins
 local function autoRelog()
     TeleportService:Teleport(126991914853936, player)
 end
+---------------------------------------------------------------------
+-- AUTO BEHIND (TOGGLE VERSION)
+---------------------------------------------------------------------
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local behindDistance = 4
+
+local behindConnection = nil
+
+local function autoBehind(on)
+    if not on then
+        if behindConnection then
+            behindConnection:Disconnect()
+            behindConnection = nil
+        end
+        return
+    end
+
+    -- Start loop
+    behindConnection = RunService.Heartbeat:Connect(function()
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        local hrp = char.HumanoidRootPart
+
+        local enemiesFolder = Workspace:FindFirstChild("Client")
+            and Workspace.Client:FindFirstChild("Enemies")
+        if not enemiesFolder then return end
+
+        local closestEnemy, closestDist
+        for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+            local hrp2 = enemy:FindFirstChild("HumanoidRootPart")
+            local hum = enemy:FindFirstChild("Humanoid")
+            if hrp2 and hum and hum.Health > 0 then
+                local dist = (hrp2.Position - hrp.Position).Magnitude
+                if not closestDist or dist < closestDist then
+                    closestDist = dist
+                    closestEnemy = enemy
+                end
+            end
+        end
+
+        if closestEnemy then
+            local eHRP = closestEnemy.HumanoidRootPart
+            local behindPos = eHRP.Position - (eHRP.CFrame.LookVector * behindDistance)
+            hrp.CFrame = CFrame.new(behindPos + Vector3.new(0,2,0), eHRP.Position)
+        end
+    end)
+end
 
 ---------------------------------------------------------------------
--- CREATE BUTTONS (AUTO ON)
+-- CREATE BUTTONS & AUTO ON LOGIC
 ---------------------------------------------------------------------
-local function createToggle(name, callback, autoOn)
-    local btn = nil
-
-    btn = GUI:CreateButton({
+local function createToggleButton(name, callback, autoOn)
+    local btn = GUI:CreateButton({
         parent = main,
         text = name .. (autoOn and " : ON" or " : OFF"),
         callback = function()
@@ -109,15 +162,14 @@ local function createToggle(name, callback, autoOn)
         end
     })
 
-    if autoOn then callback() end
+    if autoOn then
+        callback()
+    end
 end
 
----------------------------------------------------------------------
--- FINAL TOGGLES
----------------------------------------------------------------------
-
--- Buffers ON
-createToggle("Buffers", function()
+-- Sekarang sesuai permintaan
+createToggleButton("Travel", travel, true)          -- 1x
+createToggleButton("Buffers", function()          -- loop terus
     task.spawn(function()
         while true do
             buffersLoop()
@@ -126,18 +178,16 @@ createToggle("Buffers", function()
     end)
 end, true)
 
--- NEW: Start Impossible (replace Start Fight)
-createToggle("Start Impossible", function()
+createToggleButton("Start Fight", function()       -- loop terus
     task.spawn(function()
         while true do
-            startImpossibleLoop()
+            startFightLoop()
             task.wait(0.15)
         end
     end)
 end, true)
 
--- Auto Training
-createToggle("Auto Training", function()
+createToggleButton("Auto Training", function()    -- loop terus
     task.spawn(function()
         while true do
             hyperRAWLoop()
@@ -146,79 +196,23 @@ createToggle("Auto Training", function()
     end)
 end, true)
 
--- Anti AFK
-createToggle("Anti AFK", antiAFK, true)
+createToggleButton("Anti AFK", antiAFK, true)    -- 1x
 
--- PT Loop in 1 hour
-createToggle("PT Loop", function()
+createToggleButton("PT Loop", function()         -- delay 1 jam
     task.spawn(function()
         task.wait(3600)
         ptLoop()
     end)
 end, true)
 
--- Relog after 1h 5m
-createToggle("Auto Relog", function()
+createToggleButton("Auto Relog", function()      -- delay 1 jam 5 menit
     task.spawn(function()
         task.wait(3900)
         autoRelog()
     end)
 end, true)
----------------------------------------------------------------------
--- AUTO CLICK TANPA TEKAN - DI SEBELAH TOMBOL X ASHLABS
----------------------------------------------------------------------
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+createToggleButton("Auto Behind", function()
+    autoBehind(true)
+end, true)
 
-local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Cari GUI Ashlabs
-local screenGui = playerGui:WaitForChild("Ashlabs")  
-
--- Cari tombol X otomatis
-local closeBtn = nil
-for _, obj in pairs(screenGui:GetDescendants()) do
-    if obj:IsA("TextButton") and (obj.Text == "X" or obj.Name:lower():find("close")) then
-        closeBtn = obj
-        break
-    end
-end
-
-if not closeBtn then
-    warn("Tombol X GUI Ashlabs tidak ditemukan!")
-    return
-end
-
--- FRAME AREA AUTO CLICK (TRANSPARAN)
-local area = Instance.new("Frame")
-area.Size = UDim2.new(0, 60, 0, closeBtn.AbsoluteSize.Y) -- 60px area klik
-area.BackgroundTransparency = 1
-area.Parent = screenGui
-
--- Set posisi di SEBELAH KIRI tombol X
-task.defer(function()
-    area.Position = UDim2.new(
-        0, closeBtn.AbsolutePosition.X - 65,
-        0, closeBtn.AbsolutePosition.Y
-    )
-end)
-
--- Ambil posisi auto-click (tengah area)
-local function getClickPos()
-    local x = area.AbsolutePosition.X + (area.AbsoluteSize.X / 2)
-    local y = area.AbsolutePosition.Y + (area.AbsoluteSize.Y / 2)
-    return x, y
-end
-
--- AUTO CLICK LOOP (selalu ON)
-task.spawn(function()
-    while true do
-        local x, y = getClickPos()
-        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 1)
-        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 1)
-        task.wait(0.05)
-    end
-end)
-
-print("✔ Script Loaded without Auto Behind, with Start Impossible active")
+print("✔ All toggles set — Travel/AntiAFK 1x, Buffers/StartFight/Training loop, PT & Relog delayed")
