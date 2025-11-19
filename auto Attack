@@ -321,7 +321,7 @@ end)
 ----------------------------------------------------------------
 local AttackBtn = makeButton("Auto Attack: OFF", 160, Color3.fromRGB(150,50,50))
 local attackRunning = false
-local selectedWorld = "17"
+local selectedWorld = "19"
 
 ----------------------------------------------------------------
 -- WORLD DATA (PUNYA KAMU — INI COPY PASTE DARI SCRIPT SEBELUMNYA)
@@ -447,7 +447,14 @@ local worldData = {
         "\000\000\001\001\000\016Nakim Stronghold"
 	 },
     ["18"] = {
-       "\000\000\001\001\000\021Lower Wraith Infinite",
+        "\000\000\001\001\000\021Lower Wraith Infinite",
+		"\000\000\001\001\000\020Lower Demon Infinite",
+    	"\000\000\001\001\000\020Lower Ghoul Infinite",
+    	"\000\000\001\001\000\018Lower Oni Infinite",
+		"\000\000\001\001\000\rKoku Infinite"
+	 },
+    ["19"] = {
+        "\000\000\001\001\000\018Lower Demon Awaken",
 		"\000\000\001\001\000\020Lower Demon Infinite",
     	"\000\000\001\001\000\020Lower Ghoul Infinite",
     	"\000\000\001\001\000\018Lower Oni Infinite",
@@ -526,7 +533,7 @@ right.TextColor3 = Color3.new(1,1,1)
 right.Font = Enum.Font.GothamBold
 right.TextSize = 14
 
-local MAX_WORLD = 18
+local MAX_WORLD = 19
 
 local function updateWorld()
     worldDisplay.Text = "World: " .. selectedWorld
