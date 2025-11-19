@@ -454,11 +454,11 @@ local worldData = {
 		"\000\000\001\001\000\rKoku Infinite"
 	 },
     ["19"] = {
-        "\000\000\001\001\000\018Lower Demon Awaken",
-		"\000\000\001\001\000\020Lower Demon Infinite",
-    	"\000\000\001\001\000\020Lower Ghoul Infinite",
-    	"\000\000\001\001\000\018Lower Oni Infinite",
-		"\000\000\001\001\000\rKoku Infinite"
+		"\000\000\001\001\000\018Lower Demon Awaken",
+		"\000\000\001\001\000\019Lower Wraith Awaken",
+		"\000\000\001\001\000\018Lower Ghoul Awaken",
+		"\000\000\001\001\000\016Lower Oni Awaken",
+		"\000\000\001\001\000\020Koku Infinite Awaken"
 	}-- (isi sama persis dari script kamu sebelumnya)
 }
 
