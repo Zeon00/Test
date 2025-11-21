@@ -104,6 +104,12 @@ GUI:CreateSection({
 
 GUI:CreateButton({
     parent = main, 
+    text = "Auto Final selection", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/auto%20FInal%20selection))()
+end})
+GUI:CreateButton({
+    parent = main, 
     text = "Auto infinity Tower", 
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/auto%20Infinity%20Tower"))()
