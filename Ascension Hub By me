@@ -44,10 +44,10 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Click"))()
 end})
-
-GUI:CreateButton({
+GUI:CreateToggle({
     parent = main, 
     text = "Anti AFK", 
+    default = true, 
     callback = function()
 local VirtualUser = game:GetService('VirtualUser')
 game:GetService('Players').LocalPlayer.Idled:Connect(function()
@@ -60,7 +60,9 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
     Button1 = "Okay",
     Duration = 5
 })
-end})
+    end
+})
+
 GUI:CreateButton({
     parent = main, 
     text = "Fast Relog", 
@@ -82,12 +84,14 @@ if placeId == targetPlaceId then
     TeleportService:Teleport(targetPlaceId, player)
 end
 end})
-GUI:CreateButton({
+GUI:CreateToggle({
     parent = main, 
-    text = "Auto Train Strenght", 
+    text = "Auto Train Strenght",
+    default = true, 
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auto%20Train"))()
-end})
+    end
+})
 
 GUI:CreateButton({
     parent = main, 
