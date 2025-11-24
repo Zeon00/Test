@@ -1,168 +1,272 @@
---========================================================--
--- Modern Draggable Multi Toggle GUI
--- Enter Lobby hanya sekali
---========================================================--
+---------------------------------------------------------
+-- MODERN HAV FULL HUB + ICON MINIMIZE
+---------------------------------------------------------
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local Remotes = RS:WaitForChild("Remotes"):WaitForChild("FinalSelection")
 local WS = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
--- GUI
-local Screen = Instance.new("ScreenGui", player.PlayerGui)
-Screen.Name = "ModernDraggableGUI"
-Screen.ResetOnSpawn = false
+---------------------------------------------------------
+-- MAIN GUI
+---------------------------------------------------------
 
-local Main = Instance.new("Frame", Screen)
-Main.Size = UDim2.new(0, 280, 0, 240)
-Main.Position = UDim2.new(0.5, -140, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(30,30,30)
-Main.BorderSizePixel = 0
-Main.Active = true
-Main.Draggable = true
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "ModernHAV_Hub"
+gui.ResetOnSpawn = false
 
-local UICorner = Instance.new("UICorner", Main)
-UICorner.CornerRadius = UDim.new(0,12)
+-- MAIN FRAME
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 280, 0, 260)
+main.Position = UDim2.new(0.5, -140, 0.4, 0)
+main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+main.Active = true
+main.Draggable = true
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
--- Title
-local Title = Instance.new("TextLabel", Main)
-Title.Text = "Modern Hav GUI"
-Title.Size = UDim2.new(1, -60, 0, 30)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255,255,255)
-Title.TextSize = 18
-Title.Font = Enum.Font.GothamBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
+---------------------------------------------------------
+-- HEADER
+---------------------------------------------------------
 
--- X Destroy
-local Close = Instance.new("TextButton", Main)
-Close.Text = "X"
-Close.Size = UDim2.new(0, 40, 0, 28)
-Close.Position = UDim2.new(1, -45, 0, 1)
-Close.BackgroundColor3 = Color3.fromRGB(200,40,40)
-Close.TextColor3 = Color3.fromRGB(1,1,1)
-Close.Font = Enum.Font.GothamBold
-Close.TextSize = 18
-local closeCorner = Instance.new("UICorner", Close)
-closeCorner.CornerRadius = UDim.new(0,6)
-Close.MouseButton1Click:Connect(function()
-	Screen:Destroy()
+local header = Instance.new("Frame", main)
+header.Size = UDim2.new(1, 0, 0, 34)
+header.BackgroundColor3 = Color3.fromRGB(18,18,18)
+header.BorderSizePixel = 0
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel", header)
+title.Text = "Auto Final Battle"
+title.Size = UDim2.new(1, -70, 1, 0)
+title.Position = UDim2.new(0, 12, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextSize = 15
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+---------------------------------------------------------
+-- MINIMIZE & CLOSE
+---------------------------------------------------------
+
+local btnMin = Instance.new("TextButton", header)
+btnMin.Size = UDim2.new(0, 28, 0, 25)
+btnMin.Position = UDim2.new(1, -62, 0, 4)
+btnMin.BackgroundColor3 = Color3.fromRGB(60,60,60)
+btnMin.Text = "-"
+btnMin.Font = Enum.Font.GothamBold
+btnMin.TextSize = 20
+btnMin.TextColor3 = Color3.fromRGB(255,255,255)
+btnMin.BorderSizePixel = 0
+Instance.new("UICorner", btnMin).CornerRadius = UDim.new(0, 6)
+
+local btnClose = Instance.new("TextButton", header)
+btnClose.Size = UDim2.new(0, 28, 0, 25)
+btnClose.Position = UDim2.new(1, -30, 0, 4)
+btnClose.BackgroundColor3 = Color3.fromRGB(200,60,60)
+btnClose.Text = "X"
+btnClose.Font = Enum.Font.GothamBold
+btnClose.TextSize = 17
+btnClose.TextColor3 = Color3.fromRGB(255,255,255)
+btnClose.BorderSizePixel = 0
+Instance.new("UICorner", btnClose).CornerRadius = UDim.new(0, 6)
+
+btnClose.MouseButton1Click:Connect(function()
+	gui:Destroy()
 end)
 
--- Minimize
-local MinBtn = Instance.new("TextButton", Main)
-MinBtn.Text = "-"
-MinBtn.Size = UDim2.new(0, 40, 0, 28)
-MinBtn.Position = UDim2.new(1, -90, 0, 1)
-MinBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-MinBtn.TextColor3 = Color3.fromRGB(1,1,1)
-MinBtn.TextSize = 22
-MinBtn.Font = Enum.Font.GothamBold
-local minCorner = Instance.new("UICorner", MinBtn)
-minCorner.CornerRadius = UDim.new(0,6)
+---------------------------------------------------------
+-- ICON MINIMIZE (pojok kanan bawah)
+---------------------------------------------------------
 
-local MiniIcon = Instance.new("TextButton", Screen)
-MiniIcon.Visible = false
-MiniIcon.Size = UDim2.new(0, 100, 0, 30)
-MiniIcon.Position = UDim2.new(0.5, -50, 0.9, 0)
-MiniIcon.BackgroundColor3 = Color3.fromRGB(40,40,40)
-MiniIcon.Text = "Modern Hav"
-MiniIcon.TextColor3 = Color3.fromRGB(1,1,1)
-MiniIcon.Font = Enum.Font.GothamBold
-MiniIcon.TextSize = 14
-local miniCorner = Instance.new("UICorner", MiniIcon)
-miniCorner.CornerRadius = UDim.new(0,6)
+local icon = Instance.new("TextButton", gui)
+icon.Size = UDim2.new(0, 42, 0, 42)
+icon.Position = UDim2.new(1, -55, 1, -55)
+icon.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
+icon.Text = "≡"
+icon.TextColor3 = Color3.new(1,1,1)
+icon.TextSize = 22
+icon.Font = Enum.Font.GothamBold
+icon.Visible = false
+icon.BorderSizePixel = 0
+Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
 
-MinBtn.MouseButton1Click:Connect(function()
-	Main.Visible = false
-	MiniIcon.Visible = true
+btnMin.MouseButton1Click:Connect(function()
+	main.Visible = false
+	icon.Visible = true
 end)
 
-MiniIcon.MouseButton1Click:Connect(function()
-	Main.Visible = true
-	MiniIcon.Visible = false
+icon.MouseButton1Click:Connect(function()
+	main.Visible = true
+	icon.Visible = false
 end)
 
--- Toggle Buttons
-local function CreateToggle(name, posY)
-	local btn = Instance.new("TextButton", Main)
-	btn.Size = UDim2.new(0, 240, 0, 50)
-	btn.Position = UDim2.new(0.5, -120, 0, posY)
-	btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	btn.Text = name..": OFF"
+---------------------------------------------------------
+-- BUTTON MAKER (TOGGLES)
+---------------------------------------------------------
+
+local function MakeToggle(name, y)
+	local btn = Instance.new("TextButton", main)
+	btn.Size = UDim2.new(0, 240, 0, 42)
+	btn.Position = UDim2.new(0.5, -120, 0, y)
+	btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
 	btn.TextColor3 = Color3.fromRGB(255,255,255)
 	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 18
-	local corner = Instance.new("UICorner", btn)
-	corner.CornerRadius = UDim.new(0,8)
+	btn.TextSize = 16
+	btn.BorderSizePixel = 0
+	btn.Text = name..": OFF"
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+
 	local state = false
 	btn.MouseButton1Click:Connect(function()
 		state = not state
-		btn.Text = name..(state and ": ON" or ": OFF")
-		btn.BackgroundColor3 = state and Color3.fromRGB(0,150,0) or Color3.fromRGB(60,60,60)
+		btn.Text = name .. (state and ": ON" or ": OFF")
+		btn.BackgroundColor3 = state and Color3.fromRGB(0,150,80) or Color3.fromRGB(50,50,50)
 	end)
-	return btn, function() return state end
+
+	return function()
+		return state
+	end
 end
 
--- 1. Enter Lobby (Hanya sekali)
-local btnLobby = Instance.new("TextButton", Main)
-btnLobby.Size = UDim2.new(0, 240, 0, 50)
-btnLobby.Position = UDim2.new(0.5, -120, 0, 50)
-btnLobby.BackgroundColor3 = Color3.fromRGB(60,60,60)
-btnLobby.Text = "Enter Lobby"
-btnLobby.TextColor3 = Color3.fromRGB(255,255,255)
-btnLobby.Font = Enum.Font.GothamBold
-btnLobby.TextSize = 18
-local corner = Instance.new("UICorner", btnLobby)
-corner.CornerRadius = UDim.new(0,8)
-btnLobby.MouseButton1Click:Connect(function()
-	local args = {"EnterLobby"}
-	Remotes:FireServer(unpack(args))
-	btnLobby.BackgroundColor3 = Color3.fromRGB(0,150,0)
-	btnLobby.Text = "Enter Lobby: DONE"
-	btnLobby.AutoButtonColor = false
+---------------------------------------------------------
+-- ENTER LOBBY BUTTON
+---------------------------------------------------------
+
+local bLobby = Instance.new("TextButton", main)
+bLobby.Size = UDim2.new(0, 240, 0, 42)
+bLobby.Position = UDim2.new(0.5, -120, 0, 50)
+bLobby.BackgroundColor3 = Color3.fromRGB(50,50,50)
+bLobby.Text = "Enter Lobby"
+bLobby.TextColor3 = Color3.fromRGB(255,255,255)
+bLobby.Font = Enum.Font.GothamBold
+bLobby.TextSize = 16
+bLobby.BorderSizePixel = 0
+Instance.new("UICorner", bLobby).CornerRadius = UDim.new(0, 10)
+
+bLobby.MouseButton1Click:Connect(function()
+	Remotes:FireServer("EnterLobby")
+	bLobby.Text = "Enter Lobby: DONE"
+	bLobby.BackgroundColor3 = Color3.fromRGB(0,180,80)
+	bLobby.AutoButtonColor = false
 end)
 
--- 2. Enter Nightmare
-local toggleNightmare, getNightmare = CreateToggle("Enter Nightmare", 110)
--- 3. Auto Slayer Support
-local toggleSlayer, getSlayer = CreateToggle("Auto Slayer", 170)
+---------------------------------------------------------
+-- 3 TOGGLES
+---------------------------------------------------------
 
---========================================================--
--- LOGIC LOOP
---========================================================--
+local getNight = MakeToggle("Enter Nightmare", 105)
+local getSlayer = MakeToggle("Auto Slayer", 155)
+local getHyperWalk = MakeToggle("Hyper Walk", 205)
+
+---------------------------------------------------------
+-- HYPER WALK (FAST + SMOOTH + ANTI TERBANG)
+---------------------------------------------------------
+
+local hyperConn
+local hyperSpeed = 58
+local accelForce = 50000
+local smooth = 0.28
+
+local function toggleHyperWalk(on)
+	if on then
+		if hyperConn then hyperConn:Disconnect() end
+
+		hyperConn = RunService.Heartbeat:Connect(function()
+			local char = player.Character
+			if not char then return end
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+
+			local enemiesFolder = WS:FindFirstChild("Client") and WS.Client:FindFirstChild("Enemies")
+			if not enemiesFolder then return end
+
+			local closest, distMin
+			for _, mob in ipairs(enemiesFolder:GetChildren()) do
+				local eHRP = mob:FindFirstChild("HumanoidRootPart")
+				local eHum = mob:FindFirstChild("Humanoid")
+				if eHRP and eHum and eHum.Health > 0 then
+					local d = (eHRP.Position - hrp.Position).Magnitude
+					if not distMin or d < distMin then
+						closest = eHRP
+						distMin = d
+					end
+				end
+			end
+
+			if not closest then return end
+
+			local dir = (closest.Position - hrp.Position)
+			if dir.Magnitude < 2 then return end
+			dir = dir.Unit
+
+			local minY = WS.FallenPartsDestroyHeight + 10
+			if hrp.Position.Y < minY then
+				hrp.CFrame = CFrame.new(hrp.Position.X, minY, hrp.Position.Z)
+			end
+
+			local bv = hrp:FindFirstChild("HyperForce") or Instance.new("BodyVelocity")
+			bv.Name = "HyperForce"
+			bv.MaxForce = Vector3.new(accelForce, 0, accelForce)
+			bv.Velocity = hrp.Velocity:Lerp(dir * hyperSpeed, smooth)
+			bv.Parent = hrp
+		end)
+
+	else
+		if hyperConn then hyperConn:Disconnect() end
+		local char = player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			local f = char.HumanoidRootPart:FindFirstChild("HyperForce")
+			if f then f:Destroy() end
+		end
+	end
+end
+
+---------------------------------------------------------
+-- MASTER LOOP
+---------------------------------------------------------
+
 task.spawn(function()
 	while task.wait(0.2) do
-		-- ENTER NIGHTMARE
-		if getNightmare() then
-			local args = {"Enter","Nightmare"}
-			Remotes:FireServer(unpack(args))
+		
+		-- Nightmare
+		if getNight() then
+			Remotes:FireServer("Enter","Nightmare")
 		end
-		-- AUTO SLAYER SUPPORT
+		
+		-- Auto Slayer Helper
 		if getSlayer() then
-			local SlayerFolder = WS:WaitForChild("Client"):WaitForChild("Slayers")
-			local EnemyFolder = WS:WaitForChild("Client"):WaitForChild("Enemies")
-			local character = player.Character
-			if character and character:FindFirstChild("HumanoidRootPart") then
-				for _, slayer in ipairs(SlayerFolder:GetChildren()) do
-					if slayer:FindFirstChild("HumanoidRootPart") then
-						local near = false
-						for _, mob in ipairs(EnemyFolder:GetChildren()) do
-							if mob:FindFirstChild("HumanoidRootPart") then
-								if (mob.HumanoidRootPart.Position - slayer.HumanoidRootPart.Position).Magnitude < 15 then
-									near = true
-									break
+			local client = WS:FindFirstChild("Client")
+			if client then
+				local SlayerFolder = client:FindFirstChild("Slayers")
+				local EnemyFolder = client:FindFirstChild("Enemies")
+				local char = player.Character
+				if SlayerFolder and EnemyFolder and char then
+					local hrp = char:FindFirstChild("HumanoidRootPart")
+					if hrp then
+						for _, slayer in ipairs(SlayerFolder:GetChildren()) do
+							local sHRP = slayer:FindFirstChild("HumanoidRootPart")
+							if sHRP then
+								local danger = false
+								for _, mob in ipairs(EnemyFolder:GetChildren()) do
+									local mHRP = mob:FindFirstChild("HumanoidRootPart")
+									if mHRP and (mHRP.Position - sHRP.Position).Magnitude < 15 then
+										danger = true
+									end
+								end
+								if danger then
+									char:SetPrimaryPartCFrame(sHRP.CFrame + Vector3.new(0,5,0))
 								end
 							end
-						end
-						if near then
-							character:SetPrimaryPartCFrame(slayer.HumanoidRootPart.CFrame + Vector3.new(0,5,0))
 						end
 					end
 				end
 			end
 		end
+
+		-- HyperWalk Engine
+		toggleHyperWalk(getHyperWalk())
 	end
 end)
