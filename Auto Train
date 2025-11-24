@@ -180,12 +180,29 @@ dummyToggle.MouseButton1Click:Connect(function()
 	dummyOn = not dummyOn
 	dummyToggle.Text = dummyOn and "Auto Dummy: ON" or "Auto Dummy: OFF"
 	dummyToggle.BackgroundColor3 = dummyOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
+
 	if dummyOn then
-		dummyLoop = RunService.RenderStepped:Connect(fireDummy)
+		-- EXTREME MULTI-THREAD SPAM
+		dummyLoop = RunService.Heartbeat:Connect(function()
+			-- Paralel (async defer)
+			task.defer(fireDummy)
+			task.defer(fireDummy)
+			task.defer(fireDummy)
+			task.defer(fireDummy)
+			task.defer(fireDummy)
+
+			-- Sync spam
+			fireDummy()
+			fireDummy()
+			fireDummy()
+			fireDummy()
+			fireDummy()
+		end)
 	else
 		if dummyLoop then dummyLoop:Disconnect() dummyLoop = nil end
 	end
 end)
+
 
 ---------------------------------------------------------------------
 -- Auto Rebirth
