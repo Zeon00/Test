@@ -19,7 +19,7 @@ screenGui.Parent = playerGui
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 360)
+mainFrame.Size = UDim2.new(0, 320, 0, 340)
 mainFrame.Position = UDim2.new(0.5, -160, 0.5, -180)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -35,7 +35,7 @@ corner.Parent = mainFrame
 -- Title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -80, 0, 35)
-title.Position = UDim2.new(0, 10, 0, 8)
+title.Position = UDim2.new(0, 10, 0, 6)
 title.BackgroundTransparency = 1
 title.Text = "Simple Auto"
 title.TextColor3 = Color3.new(1,1,1)
@@ -69,7 +69,7 @@ Instance.new("UICorner", close)
 
 local floatIcon = Instance.new("TextButton")
 floatIcon.Size = UDim2.new(0, 140, 0, 36)
-floatIcon.Position = UDim2.new(0.85, 0, 0.15, 0)
+floatIcon.Position = UDim2.new(0.85, 0, 0.10, 0)
 floatIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 floatIcon.Text = "Simple Auto"
 floatIcon.TextColor3 = Color3.new(1,1,1)
@@ -119,7 +119,7 @@ end
 -- Select Dummy
 ---------------------------------------------------------------------
 local dummyLabel = Instance.new("TextLabel")
-dummyLabel.Size = UDim2.new(0.8, 0, 0, 25)
+dummyLabel.Size = UDim2.new(0.8, 0, 0, 10)
 dummyLabel.Position = UDim2.new(0.1, 0, 0.13, 0)
 dummyLabel.BackgroundTransparency = 1
 dummyLabel.Text = "Select Dummy:"
@@ -130,8 +130,8 @@ dummyLabel.TextXAlignment = Enum.TextXAlignment.Left
 dummyLabel.Parent = mainFrame
 
 local dummy1Btn = Instance.new("TextButton")
-dummy1Btn.Size = UDim2.new(0.35, 0, 0, 28)
-dummy1Btn.Position = UDim2.new(0.1, 0, 0.20, 0)
+dummy1Btn.Size = UDim2.new(0.35, 0, 0, 25)
+dummy1Btn.Position = UDim2.new(0.1, 0, 0.18, 0)
 dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 dummy1Btn.Text = "Dummy1"
 dummy1Btn.TextColor3 = Color3.new(1,1,1)
@@ -142,7 +142,7 @@ Instance.new("UICorner", dummy1Btn)
 
 local vipBtn = dummy1Btn:Clone()
 vipBtn.Text = "VIP"
-vipBtn.Position = UDim2.new(0.55, 0, 0.20, 0)
+vipBtn.Position = UDim2.new(0.55, 0, 0.18, 0)
 vipBtn.Parent = mainFrame
 
 local selectedDummy = nil
@@ -160,7 +160,7 @@ end)
 ---------------------------------------------------------------------
 -- Auto Dummy
 ---------------------------------------------------------------------
-local dummyToggle = createToggle(mainFrame, "Auto Dummy: OFF", 0.32)
+local dummyToggle = createToggle(mainFrame, "Auto Dummy: OFF", 0.26)
 local dummyOn, dummyLoop = false, nil
 
 local function fireDummy()
@@ -182,16 +182,12 @@ dummyToggle.MouseButton1Click:Connect(function()
 	dummyToggle.BackgroundColor3 = dummyOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
 
 	if dummyOn then
-		-- EXTREME MULTI-THREAD SPAM
 		dummyLoop = RunService.Heartbeat:Connect(function()
-			-- Paralel (async defer)
 			task.defer(fireDummy)
 			task.defer(fireDummy)
 			task.defer(fireDummy)
 			task.defer(fireDummy)
 			task.defer(fireDummy)
-
-			-- Sync spam
 			fireDummy()
 			fireDummy()
 			fireDummy()
@@ -203,11 +199,63 @@ dummyToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
+---------------------------------------------------------------------
+-- AUTO HIT (REAL DAMAGE) – Added In Center
+---------------------------------------------------------------------
+
+-- Load Combat Controller
+local CombatController
+local combatLoaded = false
+
+task.spawn(function()
+	repeat
+		for _, m in ipairs(getloadedmodules()) do
+			if m.Name == "CombatController" or m.Name == "Combat" then
+				local ok, mod = pcall(require, m)
+				if ok and type(mod) == "table" and mod.DetectHit and mod.Swing then
+					CombatController = mod
+					combatLoaded = true
+				end
+			end
+		end
+		task.wait(0.1)
+	until combatLoaded
+	print("[AUTO HIT] Loaded CombatController")
+end)
+
+-- Toggle Button
+local autoHitToggle = createToggle(mainFrame, "Auto Hit: OFF", 0.38)
+local autoHitOn = false
+
+autoHitToggle.MouseButton1Click:Connect(function()
+	autoHitOn = not autoHitOn
+	autoHitToggle.Text = autoHitOn and "Auto Hit: ON" or "Auto Hit: OFF"
+	autoHitToggle.BackgroundColor3 = autoHitOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
+end)
+
+-- Loop
+task.spawn(function()
+	while true do
+		task.wait(0.05)
+		if autoHitOn and combatLoaded then
+			CombatController.CanHit = true
+			CombatController.CombatDebounce = false
+
+			pcall(function()
+				CombatController.Swing()
+			end)
+
+			pcall(function()
+				CombatController.DetectHit(true)
+			end)
+		end
+	end
+end)
 
 ---------------------------------------------------------------------
 -- Auto Rebirth
 ---------------------------------------------------------------------
-local rebirthToggle = createToggle(mainFrame, "Auto Rebirth: OFF", 0.45)
+local rebirthToggle = createToggle(mainFrame, "Auto Rebirth: OFF", 0.50)
 local rebirthOn, rebirthLoop = false, nil
 
 local function fireRebirth()
@@ -228,39 +276,9 @@ rebirthToggle.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------------------
--- Anti AFK
----------------------------------------------------------------------
-local afkToggle = createToggle(mainFrame, "Anti-AFK: OFF", 0.57)
-local afkOn, afkLoop = false, nil
-local character = player.Character or player.CharacterAdded:Wait()
-player.CharacterAdded:Connect(function(char) character = char end)
-
-local function antiAFK()
-	while afkOn do
-		task.wait(600)
-		if character and character:FindFirstChild("HumanoidRootPart") then
-			local hrp = character.HumanoidRootPart
-			local oldPos = hrp.Position
-			hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 1)
-			task.wait(0.5)
-			hrp.CFrame = CFrame.new(oldPos)
-		end
-	end
-end
-
-afkToggle.MouseButton1Click:Connect(function()
-	afkOn = not afkOn
-	afkToggle.Text = afkOn and "Anti-AFK: ON" or "Anti-AFK: OFF"
-	afkToggle.BackgroundColor3 = afkOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
-	if afkOn then
-		task.spawn(antiAFK)
-	end
-end)
-
----------------------------------------------------------------------
 -- Auto Height
 ---------------------------------------------------------------------
-local heightToggle = createToggle(mainFrame, "Auto Height: OFF", 0.69)
+local heightToggle = createToggle(mainFrame, "Auto Height: OFF", 0.62)
 local heightOn, heightLoop = false, nil
 local defaultHeight = nil
 
@@ -295,7 +313,7 @@ end)
 ---------------------------------------------------------------------
 local tpLabel = Instance.new("TextLabel")
 tpLabel.Size = UDim2.new(0.8, 0, 0, 25)
-tpLabel.Position = UDim2.new(0.1, 0, 0.81, 0)
+tpLabel.Position = UDim2.new(0.1, 0, 0.72, 0)
 tpLabel.BackgroundTransparency = 1
 tpLabel.Text = "Teleport to World:"
 tpLabel.TextColor3 = Color3.new(1,1,1)
@@ -306,7 +324,7 @@ tpLabel.Parent = mainFrame
 
 local tpFrame = Instance.new("Frame")
 tpFrame.Size = UDim2.new(0.8, 0, 0, 30)
-tpFrame.Position = UDim2.new(0.1, 0, 0.87, 0)
+tpFrame.Position = UDim2.new(0.1, 0, 0.79, 0)
 tpFrame.BackgroundColor3 = Color3.fromRGB(70,70,80)
 tpFrame.Parent = mainFrame
 Instance.new("UICorner", tpFrame)
@@ -375,19 +393,16 @@ end)
 
 task.delay(0.5, function()
 
-	-- Select VIP
 	selectedDummy = "VIP"
 	vipBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
 	dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 
-	-- Auto Dummy ON
 	dummyOn = true
 	dummyToggle.Text = "Auto Dummy: ON"
 	dummyToggle.BackgroundColor3 = Color3.fromRGB(0,180,90)
 	if dummyLoop then dummyLoop:Disconnect() end
 	dummyLoop = RunService.RenderStepped:Connect(fireDummy)
 
-	-- Teleport to World19
 	safeFire(function()
 		GameRemote:FireServer("Travel", "World19")
 	end)
