@@ -198,21 +198,23 @@ dummyToggle.MouseButton1Click:Connect(function()
 		if dummyLoop then dummyLoop:Disconnect() dummyLoop = nil end
 	end
 end)
-
 ---------------------------------------------------------------------
--- AUTO HIT (REAL DAMAGE) – Added In Center
+-- AUTO HIT (MODERN – NO SKILL, DELAY 0.35s)
 ---------------------------------------------------------------------
 
--- Load Combat Controller
+local autoHitToggle = createToggle(mainFrame, "Auto Hit: OFF", 0.38)
+local autoHitOn = false
+
 local CombatController
 local combatLoaded = false
 
+-- Load CombatController
 task.spawn(function()
 	repeat
 		for _, m in ipairs(getloadedmodules()) do
 			if m.Name == "CombatController" or m.Name == "Combat" then
 				local ok, mod = pcall(require, m)
-				if ok and type(mod) == "table" and mod.DetectHit and mod.Swing then
+				if ok and type(mod) == "table" and mod.DetectHit then
 					CombatController = mod
 					combatLoaded = true
 				end
@@ -220,12 +222,8 @@ task.spawn(function()
 		end
 		task.wait(0.1)
 	until combatLoaded
-	print("[AUTO HIT] Loaded CombatController")
+	print("[AUTO HIT] CombatController Loaded")
 end)
-
--- Toggle Button
-local autoHitToggle = createToggle(mainFrame, "Auto Hit: OFF", 0.38)
-local autoHitOn = false
 
 autoHitToggle.MouseButton1Click:Connect(function()
 	autoHitOn = not autoHitOn
@@ -233,24 +231,18 @@ autoHitToggle.MouseButton1Click:Connect(function()
 	autoHitToggle.BackgroundColor3 = autoHitOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
 end)
 
--- Loop
+-- Main loop (delay 0.35s, no skills)
 task.spawn(function()
 	while true do
-		task.wait(0.05)
+		task.wait(0.2)
 		if autoHitOn and combatLoaded then
-			CombatController.CanHit = true
-			CombatController.CombatDebounce = false
-
-			pcall(function()
-				CombatController.Swing()
-			end)
-
 			pcall(function()
 				CombatController.DetectHit(true)
 			end)
 		end
 	end
 end)
+
 
 ---------------------------------------------------------------------
 -- Auto Rebirth
