@@ -1,5 +1,8 @@
--- FULL SIMPLE AUTO GUI (FINAL FIXED – AUTO HIT + GUI FIXED)
--- Tidak ada logic lain yang diubah.
+-- ============================================
+-- FULL SIMPLE AUTO GUI + MODERN AUTO HIT & AUTO SKILL
+-- Auto Dummy, Auto Rebirth, Teleport tetap utuh
+-- Auto Hit & Auto Skill diganti dengan versi modern stylish
+-- ============================================
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,7 +10,7 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Network Refs
+-- Network refs
 local Network = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Network"):WaitForChild("Network"):WaitForChild("RemoteEvent")
 local GameRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Game")
 
@@ -15,7 +18,7 @@ local GameRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Game"
 -- SCREEN GUI
 ---------------------------------------------------------------------
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "SimpleAutoGUI"
+screenGui.Name = "SimpleAutoGUI_StylishCombat"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
@@ -23,8 +26,8 @@ screenGui.Parent = playerGui
 -- MAIN FRAME
 ---------------------------------------------------------------------
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -160, 0.5, -180)
+mainFrame.Size = UDim2.new(0, 240, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -200)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 mainFrame.BorderSizePixel = 0
@@ -47,9 +50,7 @@ title.TextSize = 20
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = mainFrame
 
----------------------------------------------------------------------
 -- MINIMIZE + CLOSE
----------------------------------------------------------------------
 local function makeButton(txt, pos)
 	local b = Instance.new("TextButton")
 	b.Size = UDim2.new(0, 30, 0, 30)
@@ -86,9 +87,9 @@ minimize.MouseButton1Click:Connect(function()
 end)
 
 close.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	floatIcon.Visible = true
+    screenGui:Destroy()  -- Destroy GUI sepenuhnya
 end)
+
 
 floatIcon.MouseButton1Click:Connect(function()
 	mainFrame.Visible = true
@@ -162,7 +163,7 @@ vipBtn.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------------------
--- AUTO DUMMY (logic asli)
+-- AUTO DUMMY
 ---------------------------------------------------------------------
 local dummyToggle = createToggle(mainFrame, "Auto Dummy: OFF", 0.26)
 local dummyOn, dummyLoop = false, nil
@@ -195,60 +196,90 @@ dummyToggle.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------------------
--- AUTO HIT (FIX: ditambah kondisi autoHitOn)
+-- MODERN AUTO HIT + AUTO SKILL Q/E/R
 ---------------------------------------------------------------------
-local autoHitToggle = createToggle(mainFrame, "Auto Hit: OFF", 0.38)
-local autoHitOn = false
+local autoHitToggle = createToggle(mainFrame,"Auto Hit: OFF",0.38)
+local autoSkillToggle = createToggle(mainFrame,"Auto Skill Q/E/R: OFF",0.50)
+local autoHitOn, autoSkillOn = false,false
 
-local CombatController
-local combatLoaded = false
-
+-- LOAD COMBAT MODULE
+local CombatModule
 task.spawn(function()
 	repeat
 		for _, m in ipairs(getloadedmodules()) do
-			if m.Name == "CombatController" or m.Name == "Combat" then
-				local ok, mod = pcall(require, m)
-				if ok and type(mod) == "table" and mod.DetectHit then
-					CombatController = mod
-					combatLoaded = true
+			if m.Name=="CombatController" or m.Name=="Combat" then
+				local ok,mod = pcall(require,m)
+				if ok and type(mod)=="table" and mod.DetectHit and mod.UseSkill then
+					CombatModule = mod
 				end
 			end
 		end
 		task.wait(0.1)
-	until combatLoaded
+	until CombatModule
 end)
 
--- 🔥 FIX: digabung sesuai permintaan kamu
+-- INIT MODULE
+task.spawn(function()
+	repeat task.wait() until CombatModule
+	local tbl = require(ReplicatedStorage.Modules.Data)
+	CombatModule.Init(tbl)
+	CombatModule.Start()
+end)
+
+-- AUTO HIT LOOP
 task.spawn(function()
 	while true do
 		task.wait(0.01)
-		if autoHitOn and combatLoaded then
+		if autoHitOn and CombatModule and CombatModule.DetectHit then
 			pcall(function()
-				CombatController.DetectHit(true)
+				if CombatModule.CombatDebounce==false then
+					CombatModule.DetectHit(true)
+				end
 			end)
 		end
 	end
 end)
 
--- toggle button
+-- AUTO SKILL LOOP
+local skillList = {"Q","E","R"}
+local skillIndex = 1
+task.spawn(function()
+	while true do
+		task.wait(0.2)
+		if autoSkillOn and CombatModule and CombatModule.UseSkill then
+			if CombatModule.CombatDebounce==false then
+				local skillName = skillList[skillIndex]
+				pcall(function() CombatModule.UseSkill(skillName) end)
+				skillIndex = skillIndex+1
+				if skillIndex>#skillList then skillIndex=1 end
+			end
+		end
+	end
+end)
+
+-- BUTTON LOGIC
 autoHitToggle.MouseButton1Click:Connect(function()
 	autoHitOn = not autoHitOn
 	autoHitToggle.Text = autoHitOn and "Auto Hit: ON" or "Auto Hit: OFF"
 	autoHitToggle.BackgroundColor3 = autoHitOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
 end)
 
+autoSkillToggle.MouseButton1Click:Connect(function()
+	autoSkillOn = not autoSkillOn
+	autoSkillToggle.Text = autoSkillOn and "Auto Skill Q/E/R: ON" or "Auto Skill Q/E/R: OFF"
+	autoSkillToggle.BackgroundColor3 = autoSkillOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
+end)
+
 ---------------------------------------------------------------------
 -- AUTO REBIRTH
 ---------------------------------------------------------------------
-local rebirthToggle = createToggle(mainFrame, "Auto Rebirth: OFF", 0.50)
+local rebirthToggle = createToggle(mainFrame, "Auto Rebirth: OFF", 0.62)
 local rebirthOn, rebirthLoop = false, nil
-
 local function fireRebirth()
 	safeFire(function()
 		GameRemote:FireServer("Rebirth")
 	end)
 end
-
 rebirthToggle.MouseButton1Click:Connect(function()
 	rebirthOn = not rebirthOn
 	rebirthToggle.Text = rebirthOn and "Auto Rebirth: ON" or "Auto Rebirth: OFF"
@@ -266,7 +297,7 @@ end)
 ---------------------------------------------------------------------
 local tpLabel = Instance.new("TextLabel")
 tpLabel.Size = UDim2.new(0.8, 0, 0, 25)
-tpLabel.Position = UDim2.new(0.1, 0, 0.62, 0)
+tpLabel.Position = UDim2.new(0.1, 0, 0.75, 0)
 tpLabel.BackgroundTransparency = 1
 tpLabel.Text = "Teleport to World:"
 tpLabel.TextColor3 = Color3.new(1,1,1)
@@ -277,7 +308,7 @@ tpLabel.Parent = mainFrame
 
 local tpFrame = Instance.new("Frame")
 tpFrame.Size = UDim2.new(0.8, 0, 0, 30)
-tpFrame.Position = UDim2.new(0.1, 0, 0.69, 0)
+tpFrame.Position = UDim2.new(0.1, 0, 0.82, 0)
 tpFrame.BackgroundColor3 = Color3.fromRGB(70,70,80)
 tpFrame.Parent = mainFrame
 Instance.new("UICorner", tpFrame)
@@ -363,3 +394,5 @@ task.delay(0.5, function()
 	end)
 	tpSelected.Text = "World19"
 end)
+
+print("Full Stylish Auto GUI siap! Auto Hit + Auto Skill + Auto Dummy + Auto Rebirth + Teleport")
