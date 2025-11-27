@@ -1,90 +1,77 @@
--- 🌟 Auto Behind + Auto Teleport + Auto Next Floor + Auto Tower Loop + Floor Indicator (Optimized + Minimize Icon)
+--====================================================
+--   ⭐ FULL AUTO TOWER SYSTEM (FINAL MERGE COMPLETE)
+--====================================================
 
--- All-in-one Automation GUI (4 Toggles + Floor Display)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local TowerRemote = ReplicatedStorage.Remotes.Tower
 
--------------------------------------------------------------
--- 🌈 GUI Container
--------------------------------------------------------------
+--------------------------------------------------------
+-- MAKE GUI
+--------------------------------------------------------
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AutoSystemGUI"
+ScreenGui.Name = "TowerUI_FINAL"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = playerGui
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 240, 0, 320)
-Frame.Position = UDim2.new(0.5, -120, 0.5, -140)
-Frame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+Frame.Size = UDim2.new(0, 260, 0, 160)
+Frame.Position = UDim2.new(0.5, -130, 0.5, -120)
+Frame.BackgroundColor3 = Color3.fromRGB(25,25,35)
 Frame.BorderSizePixel = 0
-Frame.Active, Frame.Draggable = true, true
+Frame.Active = true
+Frame.Draggable = true
 Frame.Parent = ScreenGui
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
-local UIStroke = Instance.new("UIStroke", Frame)
-UIStroke.Thickness = 1.5
-UIStroke.Color = Color3.fromRGB(180, 180, 180)
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
 
--- Title
+local Stroke = Instance.new("UIStroke", Frame)
+Stroke.Color = Color3.fromRGB(0,150,255)
+Stroke.Thickness = 2
+
+--------------------------------------------------------
+-- TITLE
+--------------------------------------------------------
 local Title = Instance.new("TextLabel", Frame)
-Title.Size = UDim2.new(1, -70, 0, 30)
-Title.Position = UDim2.new(0, 10, 0, 5)
+Title.Size = UDim2.new(1,-20,0,28)
+Title.Position = UDim2.new(0,10,0,5)
 Title.BackgroundTransparency = 1
-Title.Text = "⚙️ Auto Tower"
 Title.Font = Enum.Font.GothamBold
-Title.TextColor3 = Color3.fromRGB(25, 25, 25)
+Title.Text = "⚙️ Tower Automation"
+Title.TextColor3 = Color3.fromRGB(180,220,255)
 Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Close + Minimize
-local CloseButton = Instance.new("TextButton", Frame)
-CloseButton.Size = UDim2.new(0, 25, 0, 25)
-CloseButton.Position = UDim2.new(1, -30, 0, 5)
-CloseButton.Text = "X"
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
-CloseButton.TextColor3 = Color3.new(1,1,1)
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.TextSize = 20
-CloseButton.BorderSizePixel = 0
-Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1,0)
+--------------------------------------------------------
+-- MINIMIZE BUTTON
+--------------------------------------------------------
+local MinBtn = Instance.new("TextButton", Frame)
+MinBtn.Size = UDim2.new(0,28,0,28)
+MinBtn.Position = UDim2.new(1,-60,0,5)
+MinBtn.BackgroundColor3 = Color3.fromRGB(0,140,255)
+MinBtn.Text = "–"
+MinBtn.TextColor3 = Color3.new(1,1,1)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 22
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(1,0)
 
-local MinButton = Instance.new("TextButton", Frame)
-MinButton.Size = UDim2.new(0, 25, 0, 25)
-MinButton.Position = UDim2.new(1, -60, 0, 5)
-MinButton.Text = "–"
-MinButton.BackgroundColor3 = Color3.fromRGB(90,170,255)
-MinButton.TextColor3 = Color3.new(1,1,1)
-MinButton.Font = Enum.Font.GothamBold
-MinButton.TextSize = 22
-MinButton.BorderSizePixel = 0
-Instance.new("UICorner", MinButton).CornerRadius = UDim.new(1,0)
-
-CloseButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
--- Minimize icon
 local Icon = Instance.new("TextButton")
-Icon.Name = "AutoIcon"
+Icon.Parent = ScreenGui
 Icon.Size = UDim2.new(0,45,0,45)
 Icon.Position = UDim2.new(1,-55,1,-55)
 Icon.AnchorPoint = Vector2.new(1,1)
-Icon.BackgroundColor3 = Color3.fromRGB(90,170,255)
+Icon.BackgroundColor3 = Color3.fromRGB(0,140,255)
 Icon.Text = "⚙️"
 Icon.TextSize = 22
 Icon.TextColor3 = Color3.new(1,1,1)
 Icon.Font = Enum.Font.GothamBold
 Icon.Visible = false
-Icon.Parent = ScreenGui
 Instance.new("UICorner", Icon).CornerRadius = UDim.new(1,0)
-local IconStroke = Instance.new("UIStroke", Icon)
-IconStroke.Thickness = 1.5
-IconStroke.Color = Color3.fromRGB(70,120,200)
 
-MinButton.MouseButton1Click:Connect(function()
+MinBtn.MouseButton1Click:Connect(function()
 	Frame.Visible = false
 	Icon.Visible = true
 end)
@@ -93,287 +80,149 @@ Icon.MouseButton1Click:Connect(function()
 	Icon.Visible = false
 end)
 
--------------------------------------------------------------
--- 🏢 FLOOR INDICATOR
--------------------------------------------------------------
+--------------------------------------------------------
+-- CLOSE BUTTON
+--------------------------------------------------------
+local CloseBtn = Instance.new("TextButton", Frame)
+CloseBtn.Size = UDim2.new(0,28,0,28)
+CloseBtn.Position = UDim2.new(1,-30,0,5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(220,50,50)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.new(1,1,1)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1,0)
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+--------------------------------------------------------
+-- FLOOR INDICATOR AUTO-RESET
+--------------------------------------------------------
 local FloorLabel = Instance.new("TextLabel", Frame)
-FloorLabel.Size = UDim2.new(1, -20, 0, 25)
-FloorLabel.Position = UDim2.new(0, 10, 0, 35)
+FloorLabel.Size = UDim2.new(1,-20,0,25)
+FloorLabel.Position = UDim2.new(0,10,0,35)
 FloorLabel.BackgroundTransparency = 1
 FloorLabel.Font = Enum.Font.GothamSemibold
-FloorLabel.TextColor3 = Color3.fromRGB(40, 40, 40)
+FloorLabel.TextColor3 = Color3.fromRGB(200,200,200)
 FloorLabel.TextSize = 16
 FloorLabel.Text = "Floor: N/A"
 FloorLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Update floor text realtime dari workspace tower display
+local function getFloorText()
+	local ok, res = pcall(function()
+		return Workspace.Map.Tower.Items.VFX.Display.Frame.Bottom.Text
+	end)
+	return ok and res or nil
+end
+
 task.spawn(function()
-	while task.wait(0.5) do
-		pcall(function()
-			local bottom = Workspace.Map.Tower.Items.VFX.Display.Frame:FindFirstChild("Bottom")
-			if bottom and bottom:IsA("TextLabel") then
-				FloorLabel.Text = "🏢 Floor: " .. tostring(bottom.Text)
-			end
-		end)
+	while task.wait(0.4) do
+		local t = getFloorText()
+		FloorLabel.Text = t and ("Floor: "..t) or "Floor: N/A"
 	end
 end)
 
--------------------------------------------------------------
--- Toggle Button Maker
--------------------------------------------------------------
-local function makeButton(y,text)
-	local b = Instance.new("TextButton",Frame)
-	b.Size = UDim2.new(0,200,0,40)
-	b.Position = UDim2.new(0.5,-100,0,y)
-	b.BackgroundColor3 = Color3.fromRGB(200,50,50)
-	b.TextColor3 = Color3.new(1,1,1)
+--------------------------------------------------------
+-- BUTTON MAKER
+--------------------------------------------------------
+local function makeBtn(y, txt)
+	local b = Instance.new("TextButton", Frame)
+	b.Size = UDim2.new(0,220,0,42)
+	b.Position = UDim2.new(0.5,-110,0,y)
+	b.BackgroundColor3 = Color3.fromRGB(200,55,55)
 	b.Font = Enum.Font.GothamBold
-	b.TextSize = 17
-	b.Text = text
-	b.BorderSizePixel = 0
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+	b.TextColor3 = Color3.new(1,1,1)
+	b.TextSize = 18
+	b.Text = txt
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
 	return b
 end
 
--------------------------------------------------------------
--- TOGGLE 1: Auto Behind Enemy
--------------------------------------------------------------
-local behindBtn = makeButton(65,"Auto Behind: OFF")
-local behindEnabled, behindConnection = false
+--------------------------------------------------------
+-- GET NEAREST MOB (WORKING VERSION)
+--------------------------------------------------------
+local function getEnemy()
+	local enemies = Workspace:FindFirstChild("Client") and Workspace.Client:FindFirstChild("Enemies")
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not enemies or not hrp then return nil end
 
-local function toggleBehind(state)
-	if state then
-		if behindConnection then behindConnection:Disconnect() end
-		behindConnection = RunService.Heartbeat:Connect(function()
-			local char = player.Character
-			if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-			local hrp = char.HumanoidRootPart
-			local enemies = Workspace:FindFirstChild("Client") and Workspace.Client:FindFirstChild("Enemies")
-			if not enemies then return end
-			local nearest, dist
-			for _,e in ipairs(enemies:GetChildren()) do
-				local h = e:FindFirstChild("Humanoid")
-				local r = e:FindFirstChild("HumanoidRootPart")
-				if h and r and h.Health>0 then
-					local d=(r.Position-hrp.Position).Magnitude
-					if not dist or d<dist then dist=d; nearest=r end
-				end
+	local nearest, dist
+
+	for _,e in ipairs(enemies:GetChildren()) do
+		local h = e:FindFirstChild("Humanoid")
+		local r = e:FindFirstChild("HumanoidRootPart")
+		if h and r and h.Health > 0 then
+			local d = (r.Position - hrp.Position).Magnitude
+			if not dist or d < dist then
+				dist = d
+				nearest = r
 			end
-			if nearest then
-				local pos=nearest.Position - nearest.CFrame.LookVector*4
-				hrp.CFrame=CFrame.new(pos+Vector3.new(0,2,0),nearest.Position)
-			end
-		end)
-	else
-		if behindConnection then behindConnection:Disconnect() end
+		end
 	end
+
+	return nearest
 end
-behindBtn.MouseButton1Click:Connect(function()
-	behindEnabled=not behindEnabled
-	behindBtn.Text="Auto Behind: "..(behindEnabled and "ON" or "OFF")
-	behindBtn.BackgroundColor3=behindEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
-	toggleBehind(behindEnabled)
-end)
 
--------------------------------------------------------------
--- TOGGLE 2: Auto Teleport
--------------------------------------------------------------
-local tpBtn = makeButton(115,"Auto Teleport: OFF")
-local tpEnabled, tpConnection = false
-local function toggleTP(state)
-	if state then
-		if tpConnection then tpConnection:Disconnect() end
-		tpConnection = RunService.Heartbeat:Connect(function()
-			local char = player.Character
-			if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-			local hrp = char.HumanoidRootPart
-			local enemies = Workspace:FindFirstChild("Client") and Workspace.Client:FindFirstChild("Enemies")
-			if not enemies then return end
-			local nearest, dist
-			for _,e in ipairs(enemies:GetChildren()) do
-				local h = e:FindFirstChild("Humanoid")
-				local r = e:FindFirstChild("HumanoidRootPart")
-				if h and r and h.Health>0 then
-					local d=(r.Position-hrp.Position).Magnitude
-					if not dist or d<dist then dist=d; nearest=r end
-				end
-			end
-			if nearest then hrp.CFrame = nearest.CFrame * CFrame.new(0,0,3) end
-		end)
-	else
-		if tpConnection then tpConnection:Disconnect() end
-	end
-end
-tpBtn.MouseButton1Click:Connect(function()
-	tpEnabled=not tpEnabled
-	tpBtn.Text="Auto Teleport: "..(tpEnabled and "ON" or "OFF")
-	tpBtn.BackgroundColor3=tpEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
-	toggleTP(tpEnabled)
-end)
+--------------------------------------------------------
+-- AUTO TOWER LOOP + TELEPORT + NEXT FLOOR
+--------------------------------------------------------
+local TowerBtn = makeBtn(80, "Auto Tower Loop: OFF")
+local enabled = false
 
--------------------------------------------------------------
--- TOGGLE 3: Auto Next Floor
--------------------------------------------------------------
-local nextBtn = makeButton(165,"Auto Next Floor: OFF")
-local nextEnabled, nextConn = false
-local lastSend = 0
-local function toggleNext(state)
-	if state then
-		if nextConn then nextConn:Disconnect() end
-		nextConn = RunService.Heartbeat:Connect(function()
-			if tick()-lastSend>=0.5 then
-				lastSend=tick()
-				pcall(function()
-					ReplicatedStorage.Remotes.Tower:FireServer("NextFloor")
-				end)
-			end
-		end)
-	else
-		if nextConn then nextConn:Disconnect() end
-	end
-end
-nextBtn.MouseButton1Click:Connect(function()
-	nextEnabled=not nextEnabled
-	nextBtn.Text="Auto Next Floor: "..(nextEnabled and "ON" or "OFF")
-	nextBtn.BackgroundColor3=nextEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
-	toggleNext(nextEnabled)
-end)
+TowerBtn.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	TowerBtn.Text = "Auto Tower Loop: " .. (enabled and "ON" or "OFF")
+	TowerBtn.BackgroundColor3 = enabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,55,55)
 
--------------------------------------------------------------
--- 🗼 TOGGLE 4: Auto Tower Loop with Auto StopFight (25s)
--------------------------------------------------------------
-local towerBtn = makeButton(215,"Auto Tower Loop: OFF")
-local towerEnabled = false
-local towerThread
+	if not enabled then return end
 
-towerBtn.MouseButton1Click:Connect(function()
-	towerEnabled = not towerEnabled
-	towerBtn.Text = "Auto Tower Loop: " .. (towerEnabled and "ON" or "OFF")
-	towerBtn.BackgroundColor3 = towerEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
+	task.spawn(function()
 
-	if towerEnabled then
-		towerThread = task.spawn(function()
-			local Tower = Workspace.Map:WaitForChild("Tower")
-			local Items = Tower:WaitForChild("Items")
-			local EnemySpawn = Items:WaitForChild("EnemySpawn")
-			local NextFloor = Items:WaitForChild("NextFloor")
-			local DisplayBottom = Items:WaitForChild("VFX"):WaitForChild("Display"):WaitForChild("Frame"):WaitForChild("Bottom")
-			local TowerRemote = ReplicatedStorage.Remotes.Tower
-			local CombatRemote = ReplicatedStorage.Remotes.Combat
-			local hrp = player.Character:WaitForChild("HumanoidRootPart")
+		while enabled do
 
-			local function tpTo(part)
-				if part and part:IsA("BasePart") then
-					hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
-				end
+			-- ENTER TOWER
+			pcall(function()
+				TowerRemote:FireServer("Enter")
+			end)
+			task.wait(1)
+
+			-- WAIT FOR MOB
+			local t = tick()
+			while not getEnemy() and tick() - t < 10 do
+				task.wait(0.3)
 			end
 
-			local function enterTower()
-				pcall(function() TowerRemote:FireServer("Enter") end)
-			end
+			local lastSeen = tick()
 
-			local function stopFight()
-				local args = { "StopFight" }
-				pcall(function()
-					CombatRemote:FireServer(unpack(args))
-				end)
-			end
+			-- COMBAT LOOP
+			while enabled do
+				local mob = getEnemy()
 
-			local function getEnemy()
-				local closest, dist = nil, math.huge
-				for _, e in ipairs(EnemySpawn:GetChildren()) do
-					local h = e:FindFirstChild("Humanoid")
-					local r = e:FindFirstChild("HumanoidRootPart")
-					if h and r and h.Health > 0 then
-						local d = (hrp.Position - r.Position).Magnitude
-						if d < dist then
-							dist = d
-							closest = e
-						end
+				if mob then
+					local char = player.Character
+					local hrp = char and char:FindFirstChild("HumanoidRootPart")
+					if hrp then
+						hrp.CFrame = mob.CFrame * CFrame.new(0,0,3)
 					end
+					lastSeen = tick()
 				end
-				return closest
-			end
 
-			local function clearAll()
-				local lastKillTime = tick()
-				repeat
-					local e = getEnemy()
-					if e and e:FindFirstChild("HumanoidRootPart") then
-						tpTo(e.HumanoidRootPart)
-						lastKillTime = tick() -- update jika ada enemy
-					end
-					task.wait(0.4)
-					-- jika mob tidak mati dalam 25 detik
-					if tick() - lastKillTime >= 25 then
-						warn("[Auto Tower] Enemy not killed in 25s → StopFight & re-enter tower")
-						stopFight()
-						enterTower()
-						lastKillTime = tick()
-					end
-				until not getEnemy()
-			end
-
-			enterTower()
-			task.wait(2)
-
-			local floorInternal = 1 -- floor internal loop
-
-			while towerEnabled do
-				local text = tostring(DisplayBottom.Text or "")
-				local displayNum = tonumber(text:match("%d+")) or floorInternal
-
-				-- update GUI title
-				Title.Text = "⚙️ Tower Floor: " .. displayNum
-
-				if displayNum >= 3260 then
-					stopFight()
-					warn("[Auto Tower] Reached Floor 3260 → StopFight sent.")
-					floorInternal = 1
-					task.wait(3)
+				-- no mob for 15 sec ⇒ floor done
+				if tick() - lastSeen > 15 then
 					break
-				else
-					clearAll()
-					tpTo(NextFloor)
-					task.wait(2)
-					floorInternal += 1
 				end
+
+				task.wait(0.2)
 			end
-		end)
-	else
-		if towerThread then
-			task.cancel(towerThread)
+
+			-- NEXT FLOOR
+			pcall(function()
+				TowerRemote:FireServer("NextFloor")
+			end)
+
+			task.wait(1.2)
 		end
-	end
-end)
 
--------------------------------------------------------------
--- 🏰 TOGGLE 5: Auto Enter Tower Loop (1 detik) - UPDATED
--------------------------------------------------------------
-local enterBtn = makeButton(265, "Auto Enter Tower: OFF")
-local enterEnabled = false
-local enterThread
-
-enterBtn.MouseButton1Click:Connect(function()
-	enterEnabled = not enterEnabled
-	enterBtn.Text = "Auto Enter Tower: " .. (enterEnabled and "ON" or "OFF")
-	enterBtn.BackgroundColor3 = enterEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
-
-	local TowerRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Tower")
-
-	if enterEnabled then
-		enterThread = task.spawn(function()
-			while enterEnabled do
-				pcall(function()
-					local args = { "Enter", 500 }
-					TowerRemote:FireServer(unpack(args))
-				end)
-				task.wait(1) -- delay loop 1 detik
-			end
-		end)
-	else
-		if enterThread then
-			task.cancel(enterThread)
-		end
-	end
+	end)
 end)
