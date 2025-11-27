@@ -240,7 +240,7 @@ nextBtn.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------------------
--- 🗼 TOGGLE 4: Auto Tower Loop (1–330)
+-- 🗼 TOGGLE 4: Auto Tower Loop with Auto StopFight (25s)
 -------------------------------------------------------------
 local towerBtn = makeButton(215,"Auto Tower Loop: OFF")
 local towerEnabled = false
@@ -273,7 +273,10 @@ towerBtn.MouseButton1Click:Connect(function()
 			end
 
 			local function stopFight()
-				pcall(function() CombatRemote:FireServer("StopFight") end)
+				local args = { "StopFight" }
+				pcall(function()
+					CombatRemote:FireServer(unpack(args))
+				end)
 			end
 
 			local function getEnemy()
@@ -293,22 +296,30 @@ towerBtn.MouseButton1Click:Connect(function()
 			end
 
 			local function clearAll()
+				local lastKillTime = tick()
 				repeat
 					local e = getEnemy()
 					if e and e:FindFirstChild("HumanoidRootPart") then
 						tpTo(e.HumanoidRootPart)
+						lastKillTime = tick() -- update jika ada enemy
 					end
 					task.wait(0.4)
+					-- jika mob tidak mati dalam 25 detik
+					if tick() - lastKillTime >= 25 then
+						warn("[Auto Tower] Enemy not killed in 25s → StopFight & re-enter tower")
+						stopFight()
+						enterTower()
+						lastKillTime = tick()
+					end
 				until not getEnemy()
 			end
 
 			enterTower()
 			task.wait(2)
 
-			local floorInternal = 1 -- ✅ floor internal untuk loop sendiri
+			local floorInternal = 1 -- floor internal loop
 
 			while towerEnabled do
-				-- ambil text dari display
 				local text = tostring(DisplayBottom.Text or "")
 				local displayNum = tonumber(text:match("%d+")) or floorInternal
 
@@ -318,14 +329,14 @@ towerBtn.MouseButton1Click:Connect(function()
 				if displayNum >= 326 then
 					stopFight()
 					warn("[Auto Tower] Reached Floor 326 → StopFight sent.")
-					floorInternal = 1 -- ✅ reset internal floor
+					floorInternal = 1
 					task.wait(3)
 					break
 				else
 					clearAll()
 					tpTo(NextFloor)
 					task.wait(2)
-					floorInternal += 1 -- ✅ increment internal floor
+					floorInternal += 1
 				end
 			end
 		end)
@@ -335,8 +346,9 @@ towerBtn.MouseButton1Click:Connect(function()
 		end
 	end
 end)
+
 -------------------------------------------------------------
--- 🏰 TOGGLE 5: Auto Enter Tower Loop (1 detik)
+-- 🏰 TOGGLE 5: Auto Enter Tower Loop (1 detik) - UPDATED
 -------------------------------------------------------------
 local enterBtn = makeButton(265, "Auto Enter Tower: OFF")
 local enterEnabled = false
@@ -347,14 +359,16 @@ enterBtn.MouseButton1Click:Connect(function()
 	enterBtn.Text = "Auto Enter Tower: " .. (enterEnabled and "ON" or "OFF")
 	enterBtn.BackgroundColor3 = enterEnabled and Color3.fromRGB(50,200,90) or Color3.fromRGB(200,50,50)
 
+	local TowerRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Tower")
+
 	if enterEnabled then
 		enterThread = task.spawn(function()
-			local TowerRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Tower")
 			while enterEnabled do
 				pcall(function()
-					TowerRemote:FireServer("Enter")
+					local args = { "Enter", 500 }
+					TowerRemote:FireServer(unpack(args))
 				end)
-				task.wait(1)
+				task.wait(1) -- delay loop 1 detik
 			end
 		end)
 	else
