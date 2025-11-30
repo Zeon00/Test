@@ -120,6 +120,13 @@ local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Te
 end})
 GUI:CreateButton({
     parent = main, 
+    text = "Auto infinity Tower Manual", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/tower%20maual"))()
+end})
+
+GUI:CreateButton({
+    parent = main, 
     text = "Auto Behind Enemy", 
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Test/refs/heads/main/Auto%20behind"))()
