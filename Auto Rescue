@@ -1,41 +1,50 @@
 --====================================================
--- MODERN AUTO WALK (FINAL + AUTO MERGE)
+-- MODERN AUTO WALK + AUTO MERGE (FINAL FULL VERSION)
 --====================================================
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+--====================================================
+-- AUTO UPDATE CHARACTER & HUMANOID
+--====================================================
 local Char = player.Character or player.CharacterAdded:Wait()
 local Hum = Char:WaitForChild("Humanoid")
 
-local Enemies = workspace.Client.Enemies
-local Muzan = Enemies:WaitForChild("Muzan")
+player.CharacterAdded:Connect(function(newChar)
+	Char = newChar
+	Hum = newChar:WaitForChild("Humanoid")
+end)
 
+--====================================================
+-- SERVICES + VARIABLES
+--====================================================
+local Enemies = workspace.Client.Enemies
 local RS = game:GetService("ReplicatedStorage")
 local RescueRemote = RS.Remotes.Rescue
 
 local running = false
 local autoLobby = false
 local autoNightmare = false
-local autoMerge = false   -- << NEW TOGGLE HERE
+local autoMerge = false
 
-------------------------------------------------------
+--====================================================
 -- GUI
-------------------------------------------------------
+--====================================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "AutoWalkModern"
 gui.ResetOnSpawn = false
 gui.Parent = game:GetService("CoreGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 260, 0, 260) -- ↑ height +40 for new toggle
+main.Size = UDim2.new(0, 260, 0, 260)
 main.Position = UDim2.new(0.5, -130, 0.4, -100)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.BackgroundColor3 = Color3.fromRGB(30,30,30)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
 main.Parent = gui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
 
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 32)
@@ -43,93 +52,90 @@ title.BackgroundTransparency = 1
 title.Text = "Auto Fast Rescue"
 title.Font = Enum.Font.GothamSemibold
 title.TextSize = 16
-title.TextColor3 = Color3.new(1, 1, 1)
+title.TextColor3 = Color3.new(1,1,1)
 
 local minimize = Instance.new("TextButton", main)
-minimize.Size = UDim2.new(0, 26, 0, 26)
-minimize.Position = UDim2.new(1, -60, 0, 4)
-minimize.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+minimize.Size = UDim2.new(0,26,0,26)
+minimize.Position = UDim2.new(1,-60,0,4)
+minimize.BackgroundColor3 = Color3.fromRGB(80,80,80)
 minimize.Text = "-"
 minimize.Font = Enum.Font.GothamBold
-minimize.TextColor3 = Color3.new(1, 1, 1)
 minimize.TextSize = 16
-Instance.new("UICorner", minimize).CornerRadius = UDim.new(0, 6)
+minimize.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", minimize).CornerRadius = UDim.new(0,6)
 
 local xBtn = Instance.new("TextButton", main)
-xBtn.Size = UDim2.new(0, 28, 0, 28)
-xBtn.Position = UDim2.new(1, -30, 0, 4)
-xBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+xBtn.Size = UDim2.new(0,28,0,28)
+xBtn.Position = UDim2.new(1,-30,0,4)
+xBtn.BackgroundColor3 = Color3.fromRGB(200,60,60)
 xBtn.Text = "X"
 xBtn.Font = Enum.Font.GothamBold
 xBtn.TextSize = 14
-xBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", xBtn).CornerRadius = UDim.new(0, 6)
+xBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", xBtn).CornerRadius = UDim.new(0,6)
 
 local container = Instance.new("Frame", main)
-container.Size = UDim2.new(1, -20, 0, 200) -- +40 size for new button
-container.Position = UDim2.new(0, 10, 0, 50)
+container.Size = UDim2.new(1,-20,0,200)
+container.Position = UDim2.new(0,10,0,50)
 container.BackgroundTransparency = 1
 
--- AutoWalk Button
+-- Start AutoWalk
 local autoBtn = Instance.new("TextButton", container)
-autoBtn.Size = UDim2.new(1, 0, 0, 36)
-autoBtn.Position = UDim2.new(0, 0, 0, 0)
-autoBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 220)
+autoBtn.Size = UDim2.new(1,0,0,36)
+autoBtn.Position = UDim2.new(0,0,0,0)
+autoBtn.BackgroundColor3 = Color3.fromRGB(50,120,220)
 autoBtn.Text = "Start AutoWalk"
 autoBtn.Font = Enum.Font.GothamBold
 autoBtn.TextSize = 14
-autoBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", autoBtn).CornerRadius = UDim.new(0, 10)
+autoBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", autoBtn).CornerRadius = UDim.new(0,10)
 
--- EnterLobby Toggle
+-- Lobby toggle
 local lobbyBtn = Instance.new("TextButton", container)
-lobbyBtn.Size = UDim2.new(1, 0, 0, 36)
-lobbyBtn.Position = UDim2.new(0, 0, 0, 46)
-lobbyBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+lobbyBtn.Size = UDim2.new(1,0,0,36)
+lobbyBtn.Position = UDim2.new(0,0,0,46)
+lobbyBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 lobbyBtn.Text = "Enter Lobby (OFF)"
 lobbyBtn.Font = Enum.Font.GothamBold
 lobbyBtn.TextSize = 14
-lobbyBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", lobbyBtn).CornerRadius = UDim.new(0, 10)
+lobbyBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", lobbyBtn).CornerRadius = UDim.new(0,10)
 
--- Nightmare Toggle
+-- Nightmare toggle
 local nightBtn = Instance.new("TextButton", container)
-nightBtn.Size = UDim2.new(1, 0, 0, 36)
-nightBtn.Position = UDim2.new(0, 0, 0, 92)
-nightBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+nightBtn.Size = UDim2.new(1,0,0,36)
+nightBtn.Position = UDim2.new(0,0,0,92)
+nightBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 nightBtn.Text = "Nightmare (OFF)"
 nightBtn.Font = Enum.Font.GothamBold
 nightBtn.TextSize = 14
-nightBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", nightBtn).CornerRadius = UDim.new(0, 10)
+nightBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", nightBtn).CornerRadius = UDim.new(0,10)
 
---======================================================
--- AUTO MERGE TOGGLE (NEW)
---======================================================
+-- Auto Merge toggle
 local mergeBtn = Instance.new("TextButton", container)
-mergeBtn.Size = UDim2.new(1, 0, 0, 36)
-mergeBtn.Position = UDim2.new(0, 0, 0, 138) -- below Nightmare
-mergeBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+mergeBtn.Size = UDim2.new(1,0,0,36)
+mergeBtn.Position = UDim2.new(0,0,0,138)
+mergeBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 mergeBtn.Text = "Auto Merge (OFF)"
 mergeBtn.Font = Enum.Font.GothamBold
 mergeBtn.TextSize = 14
-mergeBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", mergeBtn).CornerRadius = UDim.new(0, 10)
+mergeBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", mergeBtn).CornerRadius = UDim.new(0,10)
 
-------------------------------------------------------
--- MINIMIZE
-------------------------------------------------------
+--====================================================
+-- MINIMIZE BUTTON
+--====================================================
 local minimized = false
-
 minimize.MouseButton1Click:Connect(function()
 	minimized = not minimized
 	if minimized then
 		container.Visible = false
-		main.Size = UDim2.new(0, 260, 0, 40)
+		main.Size = UDim2.new(0,260,0,40)
 		minimize.Text = "+"
 	else
 		container.Visible = true
-		main.Size = UDim2.new(0, 260, 0, 260)
+		main.Size = UDim2.new(0,260,0,260)
 		minimize.Text = "-"
 	end
 end)
@@ -138,17 +144,17 @@ xBtn.MouseButton1Click:Connect(function()
 	gui:Destroy()
 end)
 
-------------------------------------------------------
--- REMOTE TOGGLES
-------------------------------------------------------
+--====================================================
+-- BUTTON TOGGLES
+--====================================================
 lobbyBtn.MouseButton1Click:Connect(function()
 	autoLobby = not autoLobby
 	if autoLobby then
-		lobbyBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 60)
+		lobbyBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
 		lobbyBtn.Text = "Enter Lobby (ON)"
 		RescueRemote:FireServer("EnterLobby")
 	else
-		lobbyBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+		lobbyBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 		lobbyBtn.Text = "Enter Lobby (OFF)"
 	end
 end)
@@ -156,29 +162,27 @@ end)
 nightBtn.MouseButton1Click:Connect(function()
 	autoNightmare = not autoNightmare
 	if autoNightmare then
-		nightBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 60)
+		nightBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
 		nightBtn.Text = "Nightmare (ON)"
 		RescueRemote:FireServer("Enter", "Nightmare")
 	else
-		nightBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+		nightBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 		nightBtn.Text = "Nightmare (OFF)"
 	end
 end)
 
---======================================================
--- AUTO MERGE LOOP
---======================================================
 mergeBtn.MouseButton1Click:Connect(function()
 	autoMerge = not autoMerge
 	if autoMerge then
-		mergeBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 60)
+		mergeBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
 		mergeBtn.Text = "Auto Merge (ON)"
 	else
-		mergeBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+		mergeBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 		mergeBtn.Text = "Auto Merge (OFF)"
 	end
 end)
 
+-- Auto merge loop
 task.spawn(function()
 	while true do
 		task.wait(0.5)
@@ -190,31 +194,15 @@ task.spawn(function()
 	end
 end)
 
-------------------------------------------------------
--- WALK FUNCTIONS AND MAIN LOOP (unchanged)
-------------------------------------------------------
-
+--====================================================
+-- WALK LOGIC FUNCTIONS
+--====================================================
 local function FastWalkTo(pos)
 	Hum.WalkSpeed = 120
 	Hum:MoveTo(pos)
 end
 
-local function HasAnyEnemy()
-	for _, m in ipairs(Enemies:GetChildren()) do
-		if m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
-			return true
-		end
-	end
-	return false
-end
-
-local function WaitForEnemies()
-	while running and not HasAnyEnemy() do
-		task.wait(0.5)
-	end
-end
-
-local function FindNonMuzanMob()
+local function FindNormalMob()
 	for _, m in ipairs(Enemies:GetChildren()) do
 		if m.Name ~= "Muzan" and m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
 			return m
@@ -223,55 +211,90 @@ local function FindNonMuzanMob()
 	return nil
 end
 
-local function FindMobInCages()
+local function FindNearestCageMob()
+	local root = Char:FindFirstChild("HumanoidRootPart")
+	if not root then return nil end
+
+	local nearest, dist = nil, math.huge
 	for i = 1, 8 do
-		local cage = Enemies:FindFirstChild("Cage" .. i)
+		local cage = Enemies:FindFirstChild("Cage"..i)
 		if cage then
 			for _, m in ipairs(cage:GetChildren()) do
-				if m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
-					return m
+				if m:FindFirstChild("HumanoidRootPart") and m.Humanoid.Health > 0 then
+					local d = (root.Position - m.HumanoidRootPart.Position).Magnitude
+					if d < dist then
+						dist = d
+						nearest = m
+					end
 				end
 			end
+		end
+	end
+	return nearest
+end
+
+local function CountNonMuzan()
+	local c = 0
+	for _, m in ipairs(Enemies:GetChildren()) do
+		if m.Name ~= "Muzan" and m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
+			c += 1
+		end
+	end
+	return c
+end
+
+local function GetMuzan()
+	for _, m in ipairs(Enemies:GetChildren()) do
+		if m.Name == "Muzan" and m:FindFirstChild("HumanoidRootPart") then
+			return m
 		end
 	end
 	return nil
 end
 
+--====================================================
+-- MAIN WALK LOOP
+--====================================================
 task.spawn(function()
 	while true do
 		task.wait(0.15)
 		if not running then continue end
 
-		WaitForEnemies()
-		if not running then continue end
-
-		local mob = FindNonMuzanMob()
-		if mob and mob:FindFirstChild("HumanoidRootPart") then
+		-- 1️⃣ Cari mob normal dulu
+		local mob = FindNormalMob()
+		if mob then
 			FastWalkTo(mob.HumanoidRootPart.Position)
 			continue
 		end
 
-		local cageMob = FindMobInCages()
-		if cageMob and cageMob:FindFirstChild("HumanoidRootPart") then
+		-- 2️⃣ Cari Cage terdekat
+		local cageMob = FindNearestCageMob()
+		if cageMob then
 			FastWalkTo(cageMob.HumanoidRootPart.Position)
 			continue
 		end
 
-		if Muzan and Muzan:FindFirstChild("HumanoidRootPart") then
-			FastWalkTo(Muzan.HumanoidRootPart.Position)
+		-- 3️⃣ Jika semua mob & cage habis → cari Muzan
+		if CountNonMuzan() == 0 then
+			local muz = GetMuzan()
+			if muz then
+				FastWalkTo(muz.HumanoidRootPart.Position)
+			end
 		end
 	end
 end)
 
+--====================================================
+-- START/STOP BUTTON
+--====================================================
 autoBtn.MouseButton1Click:Connect(function()
 	running = not running
 
 	if running then
 		autoBtn.Text = "Stop AutoWalk"
-		autoBtn.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
+		autoBtn.BackgroundColor3 = Color3.fromRGB(220,80,80)
 	else
 		autoBtn.Text = "Start AutoWalk"
-		autoBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 220)
-		Hum:MoveTo(Char.HumanoidRootPart.Position)
+		autoBtn.BackgroundColor3 = Color3.fromRGB(50,120,220)
 	end
 end)
