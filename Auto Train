@@ -1,4 +1,4 @@
--- FULL SIMPLE AUTO GUI + MODERN AUTO HIT & AUTO SKILL WITH COOLDOWN
+-- FULL SIMPLE AUTO GUI + MODERN AUTO HIT & AUTO SKILL WITH REAL-TIME COOLDOWN + REBIRTH POPUP
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -34,7 +34,7 @@ mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
 ---------------------------------------------------------------------
--- TITLE
+-- TITLE + BUTTON
 ---------------------------------------------------------------------
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -80, 0, 35)
@@ -47,7 +47,6 @@ title.TextSize = 20
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = mainFrame
 
--- MINIMIZE + CLOSE
 local function makeButton(txt, pos)
 	local b = Instance.new("TextButton")
 	b.Size = UDim2.new(0, 30, 0, 30)
@@ -84,7 +83,7 @@ minimize.MouseButton1Click:Connect(function()
 end)
 
 close.MouseButton1Click:Connect(function()
-    screenGui:Destroy()  -- Destroy GUI sepenuhnya
+    screenGui:Destroy()
 end)
 
 floatIcon.MouseButton1Click:Connect(function()
@@ -143,7 +142,7 @@ local function makeSmallButton(text, pos)
 end
 
 local dummy1Btn = makeSmallButton("Dummy1", UDim2.new(0.1, 0, 0.18, 0))
-local vipBtn = makeSmallButton("VIP", UDim2.new(0.55, 0, 0.18, 0))
+local vipBtn    = makeSmallButton("VIP",    UDim2.new(0.55, 0, 0.18, 0))
 local selectedDummy = nil
 
 dummy1Btn.MouseButton1Click:Connect(function()
@@ -192,18 +191,17 @@ dummyToggle.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------------------
--- MODERN AUTO HIT + AUTO SKILL Q/E/R WITH COOLDOWN
+-- AUTO HIT + AUTO SKILL
 ---------------------------------------------------------------------
 local autoHitToggle = createToggle(mainFrame,"Auto Hit: OFF",0.38)
 local autoSkillToggle = createToggle(mainFrame,"Auto Skill Q/E/R: OFF",0.50)
-autoHitOn, autoSkillOn = false,false
 
-local skillCooldowns = { Q=10, E=20, R=30 }
-local lastSkillUse = { Q=0, E=0, R=0 }
-local skillIndex = 1
-local skillList = {"Q","E","R"}
+autoHitOn = false
+autoSkillOn = false
 
+---------------------------------------------------------------------
 -- LOAD COMBAT MODULE
+---------------------------------------------------------------------
 local CombatModule
 task.spawn(function()
 	repeat
@@ -219,7 +217,6 @@ task.spawn(function()
 	until CombatModule
 end)
 
--- INIT MODULE
 task.spawn(function()
 	repeat task.wait() until CombatModule
 	local tbl = require(ReplicatedStorage.Modules.Data)
@@ -227,13 +224,15 @@ task.spawn(function()
 	CombatModule.Start()
 end)
 
+---------------------------------------------------------------------
 -- AUTO HIT LOOP
+---------------------------------------------------------------------
 task.spawn(function()
 	while true do
 		task.wait(0.1)
 		if autoHitOn and CombatModule and CombatModule.DetectHit then
 			pcall(function()
-				if CombatModule.CombatDebounce==false then
+				if CombatModule.CombatDebounce == false then
 					CombatModule.DetectHit(true)
 				end
 			end)
@@ -241,25 +240,36 @@ task.spawn(function()
 	end
 end)
 
--- AUTO SKILL LOOP WITH COOLDOWN
+---------------------------------------------------------------------
+-- 🔥 AUTO SKILL NO DELAY (REAL-TIME)
+---------------------------------------------------------------------
+local skillCooldowns = { Q = 10, E = 20, R = 30 }
+local lastSkillUse   = { Q = 0,  E = 0,  R = 0 }
+
 task.spawn(function()
 	while true do
-		task.wait(0.5)
+		task.wait() -- 1 frame
 		if autoSkillOn and CombatModule and CombatModule.UseSkill then
-			local skillName = skillList[skillIndex]
+
 			local now = tick()
-			if now - (lastSkillUse[skillName] or 0) >= skillCooldowns[skillName] then
-				if CombatModule.CombatDebounce==false then
-					pcall(function() CombatModule.UseSkill(skillName) end)
-					lastSkillUse[skillName] = now
+
+			for _, skillName in ipairs({"Q","E","R"}) do
+				if now - lastSkillUse[skillName] >= skillCooldowns[skillName] then
+					if CombatModule.CombatDebounce == false then
+						pcall(function()
+							CombatModule.UseSkill(skillName)
+						end)
+						lastSkillUse[skillName] = now
+					end
 				end
 			end
-			skillIndex = skillIndex + 1
-			if skillIndex>#skillList then skillIndex=1 end
 		end
 	end
 end)
 
+---------------------------------------------------------------------
+-- TOGGLE SETTING
+---------------------------------------------------------------------
 autoHitToggle.MouseButton1Click:Connect(function()
 	autoHitOn = not autoHitOn
 	autoHitToggle.Text = autoHitOn and "Auto Hit: ON" or "Auto Hit: OFF"
@@ -273,29 +283,86 @@ autoSkillToggle.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------------------
--- AUTO REBIRTH
+-- POPUP REBIRTH CONFIRMATION
+---------------------------------------------------------------------
+local confirmFrame = Instance.new("Frame")
+confirmFrame.Size = UDim2.new(0, 220, 0, 120)
+confirmFrame.Position = UDim2.new(0.5, -110, 0.5, -60)
+confirmFrame.BackgroundColor3 = Color3.fromRGB(40,40,50)
+confirmFrame.Visible = false
+confirmFrame.Parent = screenGui
+Instance.new("UICorner", confirmFrame)
+
+local confirmText = Instance.new("TextLabel")
+confirmText.Size = UDim2.new(1, -20, 0, 40)
+confirmText.Position = UDim2.new(0, 10, 0, 10)
+confirmText.BackgroundTransparency = 1
+confirmText.Font = Enum.Font.GothamBold
+confirmText.TextSize = 18
+confirmText.TextColor3 = Color3.new(1,1,1)
+confirmText.Text = "Enable Auto Rebirth?"
+confirmText.Parent = confirmFrame
+
+local yesBtn = Instance.new("TextButton")
+yesBtn.Size = UDim2.new(0.45, 0, 0, 35)
+yesBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
+yesBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+yesBtn.Text = "YES"
+yesBtn.Font = Enum.Font.GothamBold
+yesBtn.TextColor3 = Color3.new(1,1,1)
+yesBtn.TextSize = 18
+yesBtn.Parent = confirmFrame
+Instance.new("UICorner", yesBtn)
+
+local noBtn = Instance.new("TextButton")
+noBtn.Size = UDim2.new(0.45, 0, 0, 35)
+noBtn.Position = UDim2.new(0.50, 0, 0.55, 0)
+noBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
+noBtn.Text = "NO"
+noBtn.Font = Enum.Font.GothamBold
+noBtn.TextColor3 = Color3.new(1,1,1)
+noBtn.TextSize = 18
+noBtn.Parent = confirmFrame
+Instance.new("UICorner", noBtn)
+
+---------------------------------------------------------------------
+-- AUTO REBIRTH LOGIC (WITH POPUP)
 ---------------------------------------------------------------------
 local rebirthToggle = createToggle(mainFrame, "Auto Rebirth: OFF", 0.62)
-local rebirthOn, rebirthLoop = false, nil
-local function fireRebirth()
-	safeFire(function()
-		GameRemote:FireServer("Rebirth")
-	end)
-end
-rebirthToggle.MouseButton1Click:Connect(function()
-	rebirthOn = not rebirthOn
-	rebirthToggle.Text = rebirthOn and "Auto Rebirth: ON" or "Auto Rebirth: OFF"
-	rebirthToggle.BackgroundColor3 = rebirthOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(70,70,80)
+local rebirthOn = false
+local rebirthLoop = nil
 
-	if rebirthOn then
-		rebirthLoop = RunService.RenderStepped:Connect(fireRebirth)
+rebirthToggle.MouseButton1Click:Connect(function()
+	if not rebirthOn then
+		confirmFrame.Visible = true
 	else
+		rebirthOn = false
+		rebirthToggle.Text = "Auto Rebirth: OFF"
+		rebirthToggle.BackgroundColor3 = Color3.fromRGB(70,70,80)
 		if rebirthLoop then rebirthLoop:Disconnect() end
 	end
 end)
 
+yesBtn.MouseButton1Click:Connect(function()
+	confirmFrame.Visible = false
+
+	rebirthOn = true
+	rebirthToggle.Text = "Auto Rebirth: ON"
+	rebirthToggle.BackgroundColor3 = Color3.fromRGB(0,180,90)
+
+	rebirthLoop = RunService.RenderStepped:Connect(function()
+		safeFire(function()
+			GameRemote:FireServer("Rebirth")
+		end)
+	end)
+end)
+
+noBtn.MouseButton1Click:Connect(function()
+	confirmFrame.Visible = false
+end)
+
 ---------------------------------------------------------------------
--- TELEPORT
+-- TELEPORT (tetap sama dari script kamu)
 ---------------------------------------------------------------------
 local tpLabel = Instance.new("TextLabel")
 tpLabel.Size = UDim2.new(0.8, 0, 0, 25)
@@ -375,6 +442,7 @@ end
 tpLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	tpList.CanvasSize = UDim2.new(0, 0, 0, tpLayout.AbsoluteContentSize.Y + 6)
 end)
+
 ---------------------------------------------------------------------
 -- DEFAULT SETTINGS
 ---------------------------------------------------------------------
@@ -395,4 +463,4 @@ task.delay(0.5, function()
 	end)
 end)
 
-print("Full Stylish Auto GUI siap! Auto Hit + Auto Skill (with cooldown) + Auto Dummy + Auto Rebirth + Teleport")
+print("Full Stylish Auto GUI siap! Auto Hit + Auto Skill (real-time cooldown) + Auto Dummy + Auto Rebirth popup + Teleport")
