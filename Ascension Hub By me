@@ -124,6 +124,12 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/tower%20maual"))()
 end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Fast Rescue, 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Rescue"))()
+end})
 
 GUI:CreateButton({
     parent = main, 
