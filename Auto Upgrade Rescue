@@ -1,8 +1,14 @@
---// Services
+--========================================================--
+--               AUTO UPGRADE + FULL MODERN GUI
+--========================================================--
+
 local RS = game:GetService("ReplicatedStorage")
 local Remote = RS:WaitForChild("Remotes"):WaitForChild("Rescue")
 
---// Toggle States
+--========================================================--
+--                    TOGGLES TABLE
+--========================================================--
+
 local toggles = {
     Strength = false,
     CritDamage = false,
@@ -12,7 +18,10 @@ local toggles = {
     Health = false
 }
 
---// Auto Upgrade System (Safe Forever Loop)
+--========================================================--
+--                AUTO UPGRADE SAFE MAIN LOOP
+--========================================================--
+
 task.spawn(function()
     while task.wait(0.15) do
         for stat, enabled in pairs(toggles) do
@@ -26,23 +35,36 @@ task.spawn(function()
 end)
 
 --========================================================--
---                   MODERN GUI CREATOR
+--               MODERN GUI (MATCH YOUR STYLE)
 --========================================================--
 
-local gui = Instance.new("ScreenGui", game.CoreGui)
+local gui = Instance.new("ScreenGui")
 gui.Name = "ModernAutoUpgrade"
+gui.Parent = game.CoreGui
 
-local main = Instance.new("Frame", gui)
+local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 260, 0, 340)
 main.Position = UDim2.new(0.5, -130, 0.5, -170)
 main.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
+main.Parent = gui
 
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
--- Title bar
+-- Shadow
+local shadow = Instance.new("ImageLabel", main)
+shadow.Size = UDim2.new(1, 30, 1, 30)
+shadow.Position = UDim2.new(0, -15, 0, -15)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://6014261993"
+shadow.ImageTransparency = 0.55
+
+--========================================================--
+--                       TOP BAR
+--========================================================--
+
 local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1, 0, 0, 45)
 top.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
@@ -79,9 +101,14 @@ close.TextSize = 20
 Instance.new("UICorner", close).CornerRadius = UDim.new(0, 8)
 
 local minimized = false
+
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
-    main.Size = minimized and UDim2.new(0, 260, 0, 45) or UDim2.new(0, 260, 0, 340)
+    if minimized then
+        main.Size = UDim2.new(0, 260, 0, 45)
+    else
+        main.Size = UDim2.new(0, 260, 0, 340)
+    end
 end)
 
 close.MouseButton1Click:Connect(function()
@@ -89,18 +116,18 @@ close.MouseButton1Click:Connect(function()
 end)
 
 --========================================================--
---                   BUTTON CREATOR
+--                 BUTTON / TOGGLE CREATOR
 --========================================================--
 
 local function createToggle(statName, order)
     local btn = Instance.new("TextButton", main)
     btn.Size = UDim2.new(1, -40, 0, 40)
-    btn.Position = UDim2.new(0, 20, 0, 50 + (order-1)*45)
+    btn.Position = UDim2.new(0, 20, 0, 50 + (order - 1) * 45)
     btn.BackgroundColor3 = Color3.fromRGB(65, 65, 85)
-    btn.Text = statName .. ": OFF"
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 16
+    btn.Text = statName .. ": OFF"
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
     btn.MouseButton1Click:Connect(function()
@@ -117,7 +144,7 @@ local function createToggle(statName, order)
 end
 
 --========================================================--
---            CREATE ALL 6 MODERN TOGGLES
+--                RENDER ALL 6 UPGRADE TOGGLES
 --========================================================--
 
 createToggle("Strength",   1)
@@ -126,3 +153,7 @@ createToggle("Coins",      3)
 createToggle("CritChance", 4)
 createToggle("Damage",     5)
 createToggle("Health",     6)
+
+--========================================================--
+--                     FINISHED
+--========================================================--
