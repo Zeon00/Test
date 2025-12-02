@@ -1,11 +1,13 @@
 --====================================================
--- MODERN AUTO WALK + AUTO MERGE (FINAL CLEAN)
+-- MODERN AUTO WALK + AUTO MERGE + AUTO LOBBY + AUTO HIT
 --====================================================
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
 local RescueRemote = RS:WaitForChild("Remotes"):WaitForChild("Rescue")
 
 --====================================================
@@ -26,6 +28,7 @@ local Enemies = Workspace.Client.Enemies
 local running = false
 local autoLobby = false
 local autoMerge = false
+local autoHitOn = false
 
 local MUZAN_CHAMBER_POS = Vector3.new(-2372.6838, -91.4083, -3167.7165)
 
@@ -38,7 +41,7 @@ gui.ResetOnSpawn = false
 gui.Parent = game:GetService("CoreGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 260, 0, 200)
+main.Size = UDim2.new(0, 260, 0, 240)
 main.Position = UDim2.new(0.5, -130, 0.4, -100)
 main.BackgroundColor3 = Color3.fromRGB(30,30,30)
 main.BorderSizePixel = 0
@@ -57,54 +60,23 @@ title.TextSize = 16
 title.TextColor3 = Color3.new(1,1,1)
 
 -- Minimize & Close
-local minimize = Instance.new("TextButton", main)
-minimize.Size = UDim2.new(0,28,0,28)
-minimize.Position = UDim2.new(1,-60,0,4)
-minimize.BackgroundColor3 = Color3.fromRGB(80,80,80)
-minimize.Text = "-"
-minimize.Font = Enum.Font.GothamBold
-minimize.TextSize = 18
-minimize.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", minimize).CornerRadius = UDim.new(0,6)
-
-local xBtn = Instance.new("TextButton", main)
-xBtn.Size = UDim2.new(0,28,0,28)
-xBtn.Position = UDim2.new(1,-30,0,4)
-xBtn.BackgroundColor3 = Color3.fromRGB(200,60,60)
-xBtn.Text = "X"
-xBtn.Font = Enum.Font.GothamBold
-xBtn.TextSize = 14
-xBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", xBtn).CornerRadius = UDim.new(0,6)
-xBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
-
--- Container
-local container = Instance.new("Frame", main)
-container.Size = UDim2.new(1,-20,0,200)
-container.Position = UDim2.new(0,10,0,50)
-container.BackgroundTransparency = 1
-
--- Buttons
-local function createButton(text, posY)
-    local btn = Instance.new("TextButton", container)
-    btn.Size = UDim2.new(1,0,0,36)
-    btn.Position = UDim2.new(0,0,0,posY)
-    btn.BackgroundColor3 = Color3.fromRGB(120,120,120)
-    btn.Text = text
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
-    return btn
+local function makeButton(txt, pos, color)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(0,28,0,28)
+    b.Position = pos
+    b.BackgroundColor3 = color
+    b.Text = txt
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 18
+    b.TextColor3 = Color3.new(1,1,1)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+    return b
 end
 
-local autoBtn = createButton("Start AutoWalk", 0)
-autoBtn.BackgroundColor3 = Color3.fromRGB(50,120,220)
+local minimize = makeButton("-", UDim2.new(1,-60,0,4), Color3.fromRGB(80,80,80))
+local xBtn = makeButton("X", UDim2.new(1,-30,0,4), Color3.fromRGB(200,60,60))
+xBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
-local lobbyBtn = createButton("Enter Lobby (OFF)", 46)
-local mergeBtn = createButton("Auto Merge (OFF)", 92)
-
--- Fire icon for minimized mode
 local icon = Instance.new("TextButton")
 icon.Size = UDim2.new(0,60,0,60)
 icon.Position = UDim2.new(0.5, -30, 0.4, -30)
@@ -119,9 +91,6 @@ icon.Draggable = true
 icon.Parent = gui
 Instance.new("UICorner", icon).CornerRadius = UDim.new(0,10)
 
---====================================================
--- TOGGLE LOGIC
---====================================================
 local minimized = false
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -135,8 +104,40 @@ icon.MouseButton1Click:Connect(function()
 end)
 
 --====================================================
--- BUTTON TOGGLES
+-- BUTTONS
 --====================================================
+local function createButton(text, posY)
+    local btn = Instance.new("TextButton", main)
+    btn.Size = UDim2.new(1,-20,0,36)
+    btn.Position = UDim2.new(0,10,0,posY)
+    btn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.TextColor3 = Color3.new(1,1,1)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+    return btn
+end
+
+local autoBtn  = createButton("Start AutoWalk", 46)
+local lobbyBtn = createButton("Enter Lobby (OFF)", 92)
+local mergeBtn = createButton("Auto Merge (OFF)", 138)
+local hitBtn   = createButton("Auto Hit: OFF", 184)
+
+--====================================================
+-- TOGGLE LOGIC
+--====================================================
+autoBtn.MouseButton1Click:Connect(function()
+    running = not running
+    if running then
+        autoBtn.Text = "Stop AutoWalk"
+        autoBtn.BackgroundColor3 = Color3.fromRGB(220,80,80)
+    else
+        autoBtn.Text = "Start AutoWalk"
+        autoBtn.BackgroundColor3 = Color3.fromRGB(50,120,220)
+    end
+end)
+
 lobbyBtn.MouseButton1Click:Connect(function()
     autoLobby = not autoLobby
     if autoLobby then
@@ -162,17 +163,26 @@ mergeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+hitBtn.MouseButton1Click:Connect(function()
+    autoHitOn = not autoHitOn
+    if autoHitOn then
+        hitBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+        hitBtn.Text = "Auto Hit: ON"
+    else
+        hitBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+        hitBtn.Text = "Auto Hit: OFF"
+    end
+end)
+
 --====================================================
 -- MOVEMENT / HELPER FUNCTIONS
 --====================================================
 local function faceAndMoveTo(pos, speed)
     if not Char or not Char:FindFirstChild("HumanoidRootPart") then return end
     local root = Char.HumanoidRootPart
-    local currentY = root.Position.Y
-    local safePos = Vector3.new(pos.X, currentY, pos.Z)
-    root.CFrame = CFrame.lookAt(root.Position, safePos)
+    root.CFrame = CFrame.lookAt(root.Position, Vector3.new(pos.X, root.Position.Y, pos.Z))
     Hum.WalkSpeed = speed
-    Hum:MoveTo(safePos)
+    Hum:MoveTo(Vector3.new(pos.X, root.Position.Y, pos.Z))
 end
 
 local function FindNormalMob()
@@ -220,10 +230,6 @@ local function GetMuzan()
     return nil
 end
 
-local function tryGetMuzanPortal()
-    return Enemies:FindFirstChild("9508221593-MuzanPortal")
-end
-
 --====================================================
 -- AUTO LOOPS
 --====================================================
@@ -237,7 +243,7 @@ task.spawn(function()
     end
 end)
 
--- AutoWalk / Logic
+-- AutoWalk / Logic (Update)
 task.spawn(function()
     while true do
         task.wait(0.12)
@@ -255,15 +261,19 @@ task.spawn(function()
             continue
         end
 
-        if CountNonMuzan() == 0 then
-            local portal = tryGetMuzanPortal()
-            if portal and portal:FindFirstChild("MuzanChamber") then
-                faceAndMoveTo(portal.MuzanChamber.Position, 100)
-            else
-                faceAndMoveTo(MUZAN_CHAMBER_POS, 100)
-            end
+        -- Cek portal chamber dulu
+        local portal = Enemies:FindFirstChild("9508221593-MuzanPortal")
+        if portal and portal:FindFirstChild("MuzanChamber") then
+            faceAndMoveTo(portal.MuzanChamber.Position, 100)
+            continue
         end
 
+        -- Kalau portal ga ada, tapi semua mob & cage habis, ke MUZAN_CHAMBER_POS
+        if CountNonMuzan() == 0 then
+            faceAndMoveTo(MUZAN_CHAMBER_POS, 100)
+        end
+
+        -- Hadapi Muzan terakhir, kalau portal & mob & cage ga ada
         local muz = GetMuzan()
         if muz then
             faceAndMoveTo(muz.HumanoidRootPart.Position, 100)
@@ -272,15 +282,41 @@ task.spawn(function()
 end)
 
 --====================================================
--- START/STOP BUTTON
+-- AUTO HIT LOOP
 --====================================================
-autoBtn.MouseButton1Click:Connect(function()
-    running = not running
-    if running then
-        autoBtn.Text = "Stop AutoWalk"
-        autoBtn.BackgroundColor3 = Color3.fromRGB(220,80,80)
-    else
-        autoBtn.Text = "Start AutoWalk"
-        autoBtn.BackgroundColor3 = Color3.fromRGB(50,120,220)
+-- load CombatModule sama seperti script Auto Hit mu
+local CombatModule
+task.spawn(function()
+    repeat
+        for _, m in ipairs(getloadedmodules()) do
+            if m.Name=="CombatController" or m.Name=="Combat" then
+                local ok,mod = pcall(require,m)
+                if ok and type(mod)=="table" and mod.DetectHit then
+                    CombatModule = mod
+                end
+            end
+        end
+        task.wait(0.1)
+    until CombatModule
+end)
+
+task.spawn(function()
+    repeat task.wait() until CombatModule
+    CombatModule.Init(require(RS.Modules.Data))
+    CombatModule.Start()
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoHitOn and CombatModule and CombatModule.DetectHit then
+            pcall(function()
+                if CombatModule.CombatDebounce == false then
+                    CombatModule.DetectHit(true)
+                end
+            end)
+        end
     end
 end)
+
+print("Auto Walk + Merge + Lobby + Hit siap! GUI aman, damage normal, player aman.")
