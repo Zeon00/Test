@@ -190,3 +190,21 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Upgrade%20Rescue"))()
 end})
+local main = GUI:CreateTab("Misc", "setting") -- You can use IconID we didnt impleemnt lucid or any external icons
+GUI:CreateSection({
+    parent = main, 
+    text = "Misc"
+        })
+
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Grab Coordinate", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Coordinate%20Grabber"))()
+end})
+GUI:CreateButton({
+    parent = main, 
+    text = "Auto Tp to Machine", 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Teleport%20Machine"))()
+end})
