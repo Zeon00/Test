@@ -190,12 +190,6 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Upgrade%20Rescue"))()
 end})
-local main = GUI:CreateTab("Misc", "setting") -- You can use IconID we didnt impleemnt lucid or any external icons
-GUI:CreateSection({
-    parent = main, 
-    text = "Misc"
-        })
-
 GUI:CreateButton({
     parent = main, 
     text = "Auto Grab Coordinate", 
