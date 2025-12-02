@@ -462,5 +462,79 @@ task.delay(0.5, function()
 		GameRemote:FireServer("Travel", "World19")
 	end)
 end)
+---------------------------------------------------------------------
+-- AUTO FACE + TARGET FINDER
+---------------------------------------------------------------------
+local function getNearestMob()
+    local nearest, dist = nil, 50 -- max range 50 studs
+
+    for _, mob in ipairs(workspace.Client.Enemies:GetChildren()) do
+        if mob:FindFirstChild("HumanoidRootPart") then
+            local d = (mob.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist then
+                dist = d
+                nearest = mob
+            end
+        end
+    end
+
+    return nearest
+end
+
+local function faceTarget(target)
+    pcall(function()
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and target and target:FindFirstChild("HumanoidRootPart") then
+            hrp.CFrame = CFrame.new(
+                hrp.Position,
+                Vector3.new(
+                    target.HumanoidRootPart.Position.X,
+                    hrp.Position.Y,
+                    target.HumanoidRootPart.Position.Z
+                )
+            )
+        end
+    end)
+end
+
+---------------------------------------------------------------------
+-- AUTO HIT + AUTO SKILL WITH TARGET
+---------------------------------------------------------------------
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+
+        local target = getNearestMob()
+
+        if target then
+            faceTarget(target)
+
+            -- AUTO HIT
+            if autoHitOn and CombatModule and CombatModule.DetectHit then
+                if CombatModule.CombatDebounce == false then
+                    pcall(function()
+                        CombatModule.DetectHit(true)
+                    end)
+                end
+            end
+
+            -- AUTO SKILL (pakai cooldown real yang kamu punya)
+            if autoSkillOn and CombatModule and CombatModule.UseSkill then
+                local now = tick()
+
+                for _, skillName in ipairs({"Q","E","R"}) do
+                    if now - lastSkillUse[skillName] >= skillCooldowns[skillName] then
+                        if CombatModule.CombatDebounce == false then
+                            pcall(function()
+                                CombatModule.UseSkill(skillName)
+                            end)
+                            lastSkillUse[skillName] = now
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 
 print("Full Stylish Auto GUI siap! Auto Hit + Auto Skill (real-time cooldown) + Auto Dummy + Auto Rebirth popup + Teleport")
