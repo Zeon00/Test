@@ -277,38 +277,7 @@ task.spawn(function()
         end
     end
 end)
------------------------------------------------------
--- ANTI AMBLES / ANTI TIDUR / FIX HUMANOID (SAFE)
------------------------------------------------------
-task.spawn(function()
-    while true do
-        task.wait(0.05)
 
-        if not Char then continue end
-        local root = Char:FindFirstChild("HumanoidRootPart")
-        local hum = Char:FindFirstChild("Humanoid")
-        if not root or not hum then continue end
-
-        -- 1. Anti Tidur (miring/telentang)
-        local up = root.CFrame.UpVector.Y
-        if up < 0.8 then
-            root.CFrame = CFrame.new(root.Position) -- set upright
-        end
-
-        -- 2. Anti Ambles (tenggelam tanpa terbang)
-        if root.Position.Y < 1.5 then
-            root.CFrame = CFrame.new(root.Position + Vector3.new(0, 1.6, 0))
-        end
-
-        -- 3. Perbaiki HipHeight
-        if hum.HipHeight < 1 then
-            hum.HipHeight = 1.8
-        end
-
-        -- 4. Selalu bisa rotate
-        hum.AutoRotate = true
-    end
-end)
 
 print("FULL Modern Auto GUI (FINAL COMPLETE VERSION) Loaded!")
 
