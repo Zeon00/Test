@@ -361,7 +361,7 @@ task.spawn(function()
 	end
 end)
 -- ======================================================
--- 🟩 AUTO HIDE WAVEDEFENSE RESULTS + REMOVE DARK SCREEN
+-- 🟩 AUTO HIDE WAVEDEFENSE RESULTS + AUTO CLICK BUTTONS
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -370,27 +370,37 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 task.spawn(function()
     while true do
-        task.wait(0.1) -- cek setiap 0.1 detik
+        task.wait(0.1) -- cek tiap 0.1 detik
 
         local wdGui = playerGui:FindFirstChild("WaveDefense")
         if wdGui then
             local results = wdGui:FindFirstChild("Results")
             if results and results.Visible then
-                results.Visible = false
 
-                -- Hilangkan juga layer gelap / dim screen
+                -- Auto klik semua tombol di Results
+                for _, obj in ipairs(results:GetDescendants()) do
+                    if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                        obj:Activate()
+                        print("[AutoHide] Button clicked:", obj.Name)
+                    end
+                end
+
+                -- Hide semua frame/image gelap di WaveDefense
                 for _, v in ipairs(wdGui:GetChildren()) do
                     if (v:IsA("Frame") or v:IsA("ImageLabel")) and v.BackgroundTransparency < 1 then
                         v.Visible = false
                     end
                 end
 
-                -- Optional: print log
+                -- Sembunyikan Results sendiri
+                results.Visible = false
+
                 print("[AutoHide] WaveDefense Results & Dark Screen hidden")
             end
         end
     end
 end)
+
 
 -- ======================================================
 -- 🟩 TOGGLE AUTO FIGHT (MANDIRI)
