@@ -1,10 +1,7 @@
 --====================================================
--- FULL MODERN AUTO GUI (FINAL COMPLETE VERSION)
--- AutoWalk • AutoHit • AutoFight • Nightmare Loop
+-- FULL MODERN AUTO GUI (Update Muzan Portal)
+-- Auto Walk (120), Auto Merge, Lobby, Auto Hit/Fight, Nightmare, Exit
 --====================================================
--------------------------------
--- NORMAL SCRIPT START
--------------------------------
 
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
@@ -15,7 +12,7 @@ local player = Players.LocalPlayer
 local RescueRemote = RS:WaitForChild("Remotes"):WaitForChild("Rescue")
 local CombatRemote = RS:WaitForChild("Remotes"):WaitForChild("Combat")
 
--- Character Handling
+-- Character update
 local Char = player.Character or player.CharacterAdded:Wait()
 local Hum = Char:WaitForChild("Humanoid")
 player.CharacterAdded:Connect(function(newChar)
@@ -26,10 +23,10 @@ end)
 -- Variables
 local Enemies = Workspace.Client.Enemies
 local WALK_SPEED = 120
-local running, autoMerge, autoLobby, autoHitOn, autoFight, autoNightmare, autoExit = false,false,false,false,false,false,false
+local running, autoMerge, autoLobby, autoHitOn, autoFight, autoNightmare, autoExit = true,false,false,true,true,true,false
 local CombatModule = nil
 
--- Load Combat
+-- Load Combat Module
 task.spawn(function()
     repeat
         for _, m in ipairs(getloadedmodules()) do
@@ -42,18 +39,15 @@ task.spawn(function()
         end
         task.wait(0.1)
     until CombatModule
-
-    pcall(function()
-        CombatModule.Init(require(RS.Modules.Data))
-        CombatModule.Start()
-    end)
+    CombatModule.Init(require(RS.Modules.Data))
+    CombatModule.Start()
 end)
 
------------------------------------------------------
+--====================================================
 -- GUI
------------------------------------------------------
-local gui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
-gui.Name = "Auto Rescue Final"
+--====================================================
+local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+gui.Name = "Auto Rescue"
 
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0,260,0,390)
@@ -63,6 +57,7 @@ main.Active = true
 main.Draggable = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
 
+-- Title
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1,0,0,32)
 title.BackgroundTransparency = 1
@@ -71,6 +66,7 @@ title.Font = Enum.Font.GothamSemibold
 title.TextSize = 16
 title.TextColor3 = Color3.new(1,1,1)
 
+-- Minimize & Close
 local function makeButton(txt,pos,color)
     local b = Instance.new("TextButton", main)
     b.Size = UDim2.new(0,28,0,28)
@@ -89,6 +85,7 @@ local minimizeBtn = makeButton("-", UDim2.new(1,-60,0,4), Color3.fromRGB(80,80,8
 local closeBtn = makeButton("X", UDim2.new(1,-30,0,4), Color3.fromRGB(200,60,60))
 closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
+-- Icon when minimized
 local icon = Instance.new("TextButton", gui)
 icon.Size = UDim2.new(0,60,0,60)
 icon.Position = UDim2.new(0.5,-30,0.4,-30)
@@ -113,6 +110,7 @@ icon.MouseButton1Click:Connect(function()
     icon.Visible = false
 end)
 
+-- Buttons
 local function createButton(txt,posY)
     local btn = Instance.new("TextButton", main)
     btn.Size = UDim2.new(1,-20,0,36)
@@ -134,53 +132,43 @@ local fightBtn     = createButton("Auto Fight: OFF", 230)
 local nightmareBtn = createButton("Nightmare Enter (OFF)", 276)
 local exitBtn      = createButton("Exit (OFF)", 322)
 
+
 -----------------------------------------------------
--- DEFAULT START VALUES
+-- SET DEFAULT ON (AutoWalk, AutoHit, AutoFight, Nightmare)
 -----------------------------------------------------
-running = true
-autoNightmare = true
-autoHitOn = true
-autoFight = true
+task.defer(function()
+    -- AutoWalk
+    autoBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
+    autoBtn.Text = "Stop AutoWalk"
 
-autoBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
-autoBtn.Text = "Stop AutoWalk"
+    -- Auto Hit
+    hitBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+    hitBtn.Text = "Auto Hit: ON"
 
-nightmareBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
-nightmareBtn.Text = "Nightmare Enter (ON)"
+    -- Auto Fight
+    fightBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+    fightBtn.Text = "Auto Fight: ON"
+    pcall(function()
+        CombatRemote:FireServer("AutoFight", true)
+    end)
 
-hitBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
-hitBtn.Text = "Auto Hit: ON"
-
-fightBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
-fightBtn.Text = "Auto Fight: ON"
-
-pcall(function()
-    CombatRemote:FireServer("AutoFight", true)
+    -- Auto Nightmare
+    nightmareBtn.BackgroundColor3 = Color3.fromRGB(50,200,60)
+    nightmareBtn.Text = "Nightmare Enter (ON)"
+    pcall(function()
+        RescueRemote:FireServer("Enter","Nightmare")
+    end)
 end)
 
--- AUTO NIGHTMARE FLOW
-task.spawn(function()
-    -- Step 1 → Masuk Lobby
-    for i = 1,5 do
-        pcall(function() RescueRemote:FireServer("EnterLobby") end)
-        task.wait(3)
-    end
 
-    -- Step 2 → Masuk Nightmare
-    for i = 1,5 do
-        pcall(function() RescueRemote:FireServer("Enter","Nightmare") end)
-        task.wait(3)
-    end
-end)
-
------------------------------------------------------
--- HELPER FUNCTION
------------------------------------------------------
+--====================================================
+-- Helper functions
+--====================================================
 local function getNearestEnemy()
-    local nearest, shortest = nil, math.huge
-    if not Char or not Char:FindFirstChild("HumanoidRootPart") then return end
+    local nearest = nil
+    local shortest = math.huge
+    if not Char or not Char:FindFirstChild("HumanoidRootPart") then return nil end
     local rootPos = Char.HumanoidRootPart.Position
-
     for _, e in ipairs(Enemies:GetChildren()) do
         if e.PrimaryPart and (e:GetAttribute("Dead") ~= true and not e:HasTag("Immortal")) then
             local dist = (rootPos - e.PrimaryPart.Position).Magnitude
@@ -201,14 +189,70 @@ local function faceAndMoveTo(pos)
     Hum:MoveTo(Vector3.new(pos.X, root.Position.Y, pos.Z))
 end
 
------------------------------------------------------
--- AUTO LOOP
------------------------------------------------------
+--====================================================
+-- Toggle Logic
+--====================================================
+autoBtn.MouseButton1Click:Connect(function()
+    running = not running
+    autoBtn.BackgroundColor3 = running and Color3.fromRGB(50,200,60) or Color3.fromRGB(120,120,120)
+    autoBtn.Text = running and "Stop AutoWalk" or "Start AutoWalk"
+end)
+
+mergeBtn.MouseButton1Click:Connect(function()
+    autoMerge = not autoMerge
+    mergeBtn.BackgroundColor3 = autoMerge and Color3.fromRGB(50,200,60) or Color3.fromRGB(120,120,120)
+    mergeBtn.Text = autoMerge and "Auto Merge (ON)" or "Auto Merge (OFF)"
+end)
+
+lobbyBtn.MouseButton1Click:Connect(function()
+    autoLobby = not autoLobby
+    lobbyBtn.BackgroundColor3 = autoLobby and Color3.fromRGB(50,200,60) or Color3.fromRGB(120,120,120)
+    lobbyBtn.Text = autoLobby and "Enter Lobby (ON)" or "Enter Lobby (OFF)"
+    if autoLobby then
+        pcall(function() RescueRemote:FireServer("EnterLobby") end)
+    end
+end)
+
+hitBtn.MouseButton1Click:Connect(function()
+    autoHitOn = not autoHitOn
+    hitBtn.BackgroundColor3 = autoHitOn and Color3.fromRGB(0,180,90) or Color3.fromRGB(120,120,120)
+    hitBtn.Text = autoHitOn and "Auto Hit: ON" or "Auto Hit: OFF"
+end)
+
+fightBtn.MouseButton1Click:Connect(function()
+    autoFight = not autoFight
+    fightBtn.BackgroundColor3 = autoFight and Color3.fromRGB(0,180,90) or Color3.fromRGB(120,120,120)
+    fightBtn.Text = autoFight and "Auto Fight: ON" or "Auto Fight: OFF"
+    local args = {"AutoFight", autoFight}
+    pcall(function() CombatRemote:FireServer(unpack(args)) end)
+end)
+
+nightmareBtn.MouseButton1Click:Connect(function()
+    autoNightmare = not autoNightmare
+    nightmareBtn.BackgroundColor3 = autoNightmare and Color3.fromRGB(50,200,60) or Color3.fromRGB(120,120,120)
+    nightmareBtn.Text = autoNightmare and "Nightmare Enter (ON)" or "Nightmare Enter (OFF)"
+    if autoNightmare then
+        pcall(function() RescueRemote:FireServer("Enter","Nightmare") end)
+    end
+end)
+
+exitBtn.MouseButton1Click:Connect(function()
+    autoExit = not autoExit
+    exitBtn.BackgroundColor3 = autoExit and Color3.fromRGB(50,200,60) or Color3.fromRGB(120,120,120)
+    exitBtn.Text = autoExit and "Exit (ON)" or "Exit (OFF)"
+    if autoExit then
+        pcall(function() RescueRemote:FireServer("Exit") end)
+    end
+end)
+
+--====================================================
+-- Auto Loop
+--====================================================
 task.spawn(function()
     while true do
         task.wait(0.1)
-
-        if running and CombatModule then
+        if running and CombatModule and CombatModule.DetectHit then
+            -- Cek Muzan Portal
             local portal = Enemies:FindFirstChild("9508221593-MuzanPortal")
             if portal and portal:FindFirstChild("MuzanChamber") then
                 faceAndMoveTo(portal.MuzanChamber.Position)
@@ -218,13 +262,11 @@ task.spawn(function()
                     local rootPos = Char.HumanoidRootPart.Position
                     local dist = (rootPos - enemy.PrimaryPart.Position).Magnitude
                     local range = enemy.Name == "Muzan" and 12 or 8
-
                     if dist > range then
                         faceAndMoveTo(enemy.PrimaryPart.Position)
                     else
                         local pivot = Char:GetPivot().Position
-                        Char:PivotTo(CFrame.new(pivot, enemy.PrimaryPart.Position))
-
+                        Char:PivotTo(CFrame.new(pivot, enemy.PrimaryPart.Position * Vector3.new(1,0,1) + pivot * Vector3.new(0,1,0)))
                         pcall(function()
                             if autoHitOn and CombatModule.CombatDebounce == false then
                                 CombatModule.DetectHit(true)
@@ -235,10 +277,9 @@ task.spawn(function()
             end
         end
 
+        -- Auto Merge
         if autoMerge then
-            pcall(function()
-                RescueRemote:FireServer("MergeAll")
-            end)
+            pcall(function() RescueRemote:FireServer("MergeAll") end)
         end
     end
 end)
@@ -278,6 +319,4 @@ task.spawn(function()
     end
 end)
 
-
-print("FULL Modern Auto GUI (FINAL COMPLETE VERSION) Loaded!")
-
+print("FULL Modern Auto GUI siap! MoveSpeed = 100, Muzan Portal support, semua toggle ON/OFF.")
