@@ -118,7 +118,30 @@ local function startSending() sending = true end
 local function stopSending() sending = false end
 local function toggleSending() sending = not sending end
 
--- GUI -------------------------------------------------------------------
+------------------------------------------------------------------
+-- Auto Click Toggle (New Feature)
+------------------------------------------------------------------
+
+local autoClick = true  -- Default is ON
+
+-- Simulate mouse click every 5 second when Auto Click is enabled
+task.spawn(function()
+    while true do
+        if autoClick then
+            -- Simulate the mouse click (button 1 click)
+            local mouse = player:GetMouse()
+            pcall(function()
+                mouse1click()
+            end)
+        end
+        task.wait(5)
+    end
+end)
+
+------------------------------------------------------------------
+-- GUI
+------------------------------------------------------------------
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AutoSendBuffers_Modern"
 screenGui.ResetOnSpawn = false
@@ -126,7 +149,7 @@ screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 180, 0, 280)
+mainFrame.Size = UDim2.new(0, 180, 0, 300)
 mainFrame.Position = UDim2.new(1, -280, 1, -180)
 mainFrame.AnchorPoint = Vector2.new(1, 1)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -179,6 +202,24 @@ toggleBtn.Text = "Buffers: ON"
 toggleBtn.Parent = mainFrame
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
 toggleBtn.MouseButton1Click:Connect(toggleSending)
+
+-- Auto Click Toggle
+local clickToggleBtn = Instance.new("TextButton")
+clickToggleBtn.Size = UDim2.new(0, 160, 0, 28)
+clickToggleBtn.Position = UDim2.new(0.5, 0, 0, 250)
+clickToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+clickToggleBtn.Font = Enum.Font.GothamBold
+clickToggleBtn.TextSize = 16
+clickToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+clickToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 80)
+clickToggleBtn.Text = "Auto Click: ON"
+clickToggleBtn.Parent = mainFrame
+Instance.new("UICorner", clickToggleBtn).CornerRadius = UDim.new(0, 8)
+clickToggleBtn.MouseButton1Click:Connect(function()
+    autoClick = not autoClick
+    clickToggleBtn.Text = autoClick and "Auto Click: ON" or "Auto Click: OFF"
+    clickToggleBtn.BackgroundColor3 = autoClick and Color3.fromRGB(50, 200, 80) or Color3.fromRGB(180, 50, 50)
+end)
 
 -- IMPOSSIBLE LOOP DEFAULT ON
 local startLoop = true
