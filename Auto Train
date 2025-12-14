@@ -149,12 +149,12 @@ local function makeSmallButton(text, pos)
 	return b
 end
 
-local dummy1Btn = makeSmallButton("Dummy1", UDim2.new(0.1, 0, 0.18, 0))
+local dummy1Btn = makeSmallButton("Dummy6", UDim2.new(0.1, 0, 0.18, 0))
 local vipBtn    = makeSmallButton("VIP",    UDim2.new(0.55, 0, 0.18, 0))
 local selectedDummy = nil
 
 dummy1Btn.MouseButton1Click:Connect(function()
-	selectedDummy = "Dummy1"
+	selectedDummy = "Dummy6"
 	dummy1Btn.BackgroundColor3 = Color3.fromRGB(0,180,90)
 	vipBtn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 end)
@@ -174,7 +174,7 @@ local dummyOn, dummyLoop = false, nil
 local function fireDummy()
 	safeFire(function()
 		if not selectedDummy then return end
-		if selectedDummy == "Dummy1" then
+		if selectedDummy == "Dummy6" then
 			Network:FireServer(buffer.fromstring("\000\006Dummy1"))
 		else
 			Network:FireServer(buffer.fromstring("\000\003VIP"))
