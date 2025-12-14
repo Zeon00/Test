@@ -175,7 +175,7 @@ local function fireDummy()
 	safeFire(function()
 		if not selectedDummy then return end
 		if selectedDummy == "Dummy6" then
-			Network:FireServer(buffer.fromstring("\000\006Dummy1"))
+			Network:FireServer(buffer.fromstring("\000\006Dummy6"))
 		else
 			Network:FireServer(buffer.fromstring("\000\003VIP"))
 		end
