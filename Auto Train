@@ -137,7 +137,7 @@ dummyLabel.Parent = mainFrame
 
 local function makeSmallButton(text, pos)
 	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(0.35, 0, 0, 25)
+	b.Size = UDim2.new(0.27, 0, 0, 25)
 	b.Position = pos
 	b.BackgroundColor3 = Color3.fromRGB(70,70,80)
 	b.Text = text
@@ -149,21 +149,8 @@ local function makeSmallButton(text, pos)
 	return b
 end
 
-local dummy1Btn = makeSmallButton("Dummy6", UDim2.new(0.1, 0, 0.18, 0))
-local vipBtn    = makeSmallButton("VIP",    UDim2.new(0.55, 0, 0.18, 0))
-local selectedDummy = nil
-
-dummy1Btn.MouseButton1Click:Connect(function()
-	selectedDummy = "Dummy6"
-	dummy1Btn.BackgroundColor3 = Color3.fromRGB(0,180,90)
-	vipBtn.BackgroundColor3 = Color3.fromRGB(70,70,80)
-end)
-
-vipBtn.MouseButton1Click:Connect(function()
-	selectedDummy = "VIP"
-	vipBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
-	dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
-end)
+-- BUTTONS
+local dummy1Btn = makeSmallButton("Dummy1", UDim2.new(0.1, 0
 
 ---------------------------------------------------------------------
 -- AUTO DUMMY
@@ -174,13 +161,16 @@ local dummyOn, dummyLoop = false, nil
 local function fireDummy()
 	safeFire(function()
 		if not selectedDummy then return end
-		if selectedDummy == "Dummy6" then
+		if selectedDummy == "Dummy1" then
+			Network:FireServer(buffer.fromstring("\000\006Dummy1"))
+		elseif selectedDummy == "Dummy6" then
 			Network:FireServer(buffer.fromstring("\000\006Dummy6"))
-		else
+		elseif selectedDummy == "VIP" then
 			Network:FireServer(buffer.fromstring("\000\003VIP"))
 		end
 	end)
 end
+
 
 dummyToggle.MouseButton1Click:Connect(function()
 	dummyOn = not dummyOn
@@ -455,7 +445,9 @@ end)
 -- defaults: do NOT auto-enable anything on spawn
 selectedDummy = nil
 dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
+dummy6Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 vipBtn.BackgroundColor3    = Color3.fromRGB(70,70,80)
+
 
 dummyOn = false
 dummyToggle.Text = "Auto Dummy: OFF"
