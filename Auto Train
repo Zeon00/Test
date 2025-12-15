@@ -120,7 +120,6 @@ local function safeFire(fn)
 	local ok, err = pcall(fn)
 	if not ok then warn("[SafeFire]:", err) end
 end
-
 ---------------------------------------------------------------------
 -- SELECT DUMMY
 ---------------------------------------------------------------------
@@ -150,7 +149,35 @@ local function makeSmallButton(text, pos)
 end
 
 -- BUTTONS
-local dummy1Btn = makeSmallButton("Dummy1", UDim2.new(0.1, 0
+local dummy1Btn = makeSmallButton("Dummy1", UDim2.new(0.1, 0, 0.18, 0))
+local dummy6Btn = makeSmallButton("Dummy6", UDim2.new(0.37, 0, 0.18, 0))
+local vipBtn    = makeSmallButton("VIP",    UDim2.new(0.64, 0, 0.18, 0))
+
+local selectedDummy = nil
+
+local function resetDummyButtons()
+	dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
+	dummy6Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
+	vipBtn.BackgroundColor3    = Color3.fromRGB(70,70,80)
+end
+
+dummy1Btn.MouseButton1Click:Connect(function()
+	selectedDummy = "Dummy1"
+	resetDummyButtons()
+	dummy1Btn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+end)
+
+dummy6Btn.MouseButton1Click:Connect(function()
+	selectedDummy = "Dummy6"
+	resetDummyButtons()
+	dummy6Btn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+end)
+
+vipBtn.MouseButton1Click:Connect(function()
+	selectedDummy = "VIP"
+	resetDummyButtons()
+	vipBtn.BackgroundColor3 = Color3.fromRGB(0,180,90)
+end)
 
 ---------------------------------------------------------------------
 -- AUTO DUMMY
@@ -170,6 +197,7 @@ local function fireDummy()
 		end
 	end)
 end
+
 
 
 dummyToggle.MouseButton1Click:Connect(function()
@@ -447,7 +475,6 @@ selectedDummy = nil
 dummy1Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 dummy6Btn.BackgroundColor3 = Color3.fromRGB(70,70,80)
 vipBtn.BackgroundColor3    = Color3.fromRGB(70,70,80)
-
 
 dummyOn = false
 dummyToggle.Text = "Auto Dummy: OFF"
