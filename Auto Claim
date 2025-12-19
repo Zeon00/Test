@@ -1,0 +1,190 @@
+-- WAIT PLAYER GUI
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+repeat task.wait() until player:FindFirstChild("PlayerGui")
+
+-- GUI PARENT
+local parentGui = gethui and gethui() or player.PlayerGui
+
+-- STATE
+local runningPT = false
+local runningReset = false
+local minimized = false
+local PT_INTERVAL = 1      -- PT loop setiap 1 detik
+local RESET_INTERVAL = 3600 -- ResetPlayTime setiap 1 jam
+
+-- SCREEN GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "AutoLoopsGUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = parentGui
+
+-- FRAME
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0, 300, 0, 200)
+frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+
+-- TITLE
+local title = Instance.new("TextLabel")
+title.Parent = frame
+title.Text = "Auto Loops"
+title.Size = UDim2.new(1, -80, 0, 40)
+title.Position = UDim2.new(0, 12, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- CLOSE
+local close = Instance.new("TextButton")
+close.Parent = frame
+close.Text = "X"
+close.Size = UDim2.new(0,30,0,30)
+close.Position = UDim2.new(1,-36,0,6)
+close.BackgroundColor3 = Color3.fromRGB(170,60,60)
+close.TextColor3 = Color3.new(1,1,1)
+close.Font = Enum.Font.GothamBold
+close.TextSize = 14
+Instance.new("UICorner", close)
+
+close.MouseButton1Click:Connect(function()
+	runningPT = false
+	runningReset = false
+	gui:Destroy()
+end)
+
+-- MINIMIZE
+local mini = Instance.new("TextButton")
+mini.Parent = frame
+mini.Text = "-"
+mini.Size = UDim2.new(0,30,0,30)
+mini.Position = UDim2.new(1,-72,0,6)
+mini.BackgroundColor3 = Color3.fromRGB(70,70,70)
+mini.TextColor3 = Color3.new(1,1,1)
+mini.Font = Enum.Font.GothamBold
+mini.TextSize = 18
+Instance.new("UICorner", mini)
+
+-- TOGGLE PT LOOP
+local togglePT = Instance.new("TextButton")
+togglePT.Parent = frame
+togglePT.Text = "PT Loop: OFF"
+togglePT.Size = UDim2.new(0,260,0,45)
+togglePT.Position = UDim2.new(0.5,-130,0,60)
+togglePT.BackgroundColor3 = Color3.fromRGB(120,60,60)
+togglePT.TextColor3 = Color3.new(1,1,1)
+togglePT.Font = Enum.Font.GothamBold
+togglePT.TextSize = 16
+Instance.new("UICorner", togglePT)
+
+-- TOGGLE RESET LOOP
+local toggleReset = Instance.new("TextButton")
+toggleReset.Parent = frame
+toggleReset.Text = "ResetPlayTime: OFF"
+toggleReset.Size = UDim2.new(0,260,0,45)
+toggleReset.Position = UDim2.new(0.5,-130,0,120)
+toggleReset.BackgroundColor3 = Color3.fromRGB(120,60,60)
+toggleReset.TextColor3 = Color3.new(1,1,1)
+toggleReset.Font = Enum.Font.GothamBold
+toggleReset.TextSize = 16
+Instance.new("UICorner", toggleReset)
+
+-- MINIMIZE LOGIC
+mini.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	togglePT.Visible = not minimized
+	toggleReset.Visible = not minimized
+	frame.Size = minimized and UDim2.new(0,300,0,45) or UDim2.new(0,300,0,200)
+end)
+
+-- SEND FUNCTIONS
+local function sendPT()
+	for i = 10, 1, -1 do
+		if i ~= 3 then
+			local args = {
+				{
+					{
+						"PT",
+						tostring(i)
+					},
+					"\006"
+				}
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("BridgeNet")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+			task.wait(0.1)
+		end
+	end
+end
+
+local function sendResetPlayTime()
+	local args = {
+		{
+			{
+				"ResetPlayTime"
+			},
+			"\006"
+		}
+	}
+	game:GetService("ReplicatedStorage")
+		:WaitForChild("BridgeNet")
+		:WaitForChild("dataRemoteEvent")
+		:FireServer(unpack(args))
+end
+
+-- LOOP PT
+task.spawn(function()
+	while true do
+		if runningPT then
+			pcall(sendPT)
+			task.wait(PT_INTERVAL)
+		else
+			task.wait(1)
+		end
+	end
+end)
+
+-- LOOP RESET
+task.spawn(function()
+	while true do
+		if runningReset then
+			pcall(sendResetPlayTime)
+			task.wait(RESET_INTERVAL)
+		else
+			task.wait(1)
+		end
+	end
+end)
+
+-- TOGGLE LOGIC
+togglePT.MouseButton1Click:Connect(function()
+	runningPT = not runningPT
+	if runningPT then
+		togglePT.Text = "PT Loop: ON"
+		togglePT.BackgroundColor3 = Color3.fromRGB(60,120,60)
+	else
+		togglePT.Text = "PT Loop: OFF"
+		togglePT.BackgroundColor3 = Color3.fromRGB(120,60,60)
+	end
+end)
+
+toggleReset.MouseButton1Click:Connect(function()
+	runningReset = not runningReset
+	if runningReset then
+		toggleReset.Text = "ResetPlayTime: ON"
+		toggleReset.BackgroundColor3 = Color3.fromRGB(60,120,60)
+	else
+		toggleReset.Text = "ResetPlayTime: OFF"
+		toggleReset.BackgroundColor3 = Color3.fromRGB(120,60,60)
+	end
+end)
