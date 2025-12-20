@@ -225,8 +225,8 @@ nightBtn.MouseButton1Click:Connect(function()
 	autoNightmare = not autoNightmare
 	waitingResult = false
 
-	nightmareBtn.Text = autoNightmare and "Auto Nightmare: ON" or "Auto Nightmare: OFF"
-	nightmareBtn.BackgroundColor3 = autoNightmare
+	nightBtn.Text = autoNightmare and "Auto Nightmare: ON" or "Auto Nightmare: OFF"
+	nightBtn.BackgroundColor3 = autoNightmare
 		and Color3.fromRGB(50,200,60)
 		or Color3.fromRGB(120,120,120)
 
@@ -239,6 +239,7 @@ nightBtn.MouseButton1Click:Connect(function()
 		end)
 	end
 end)
+
 
 
 bridgeBtn.MouseButton1Click:Connect(function()
