@@ -302,5 +302,23 @@ task.spawn(function()
 		end
 	end
 end)
-
+--====================================================
+-- AUTO HATCH LOOP
+--====================================================
+task.spawn(function()
+	while alive do
+		task.wait(1)
+		if autoHatch then
+			pcall(function()
+				game:GetService("ReplicatedStorage")
+					.BridgeNet.dataRemoteEvent:FireServer({
+						{
+							{"\001","\139!\027(\219OO\n\175\243\142\244y\242 =","Christmas"},
+							"\004"
+						}
+					})
+			end)
+		end
+	end
+end)
 print("FINAL AUTO GRINCH LOADED | FULL | STABLE")
