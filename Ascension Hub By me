@@ -49,17 +49,97 @@ GUI:CreateToggle({
     text = "Anti AFK", 
     default = true, 
     callback = function()
-local VirtualUser = game:GetService('VirtualUser')
-game:GetService('Players').LocalPlayer.Idled:Connect(function()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
+--==================================================
+-- ANTI AFK (MOUSE MOVE + CLICK) + NOTIFICATION
+--==================================================
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+
+----------------------------------------------------
+-- NOTIFICATION UI
+----------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "AntiAFK_Notify"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local notif = Instance.new("Frame", gui)
+notif.Size = UDim2.new(0, 260, 0, 55)
+notif.Position = UDim2.new(1, -270, 1, 70)
+notif.BackgroundColor3 = Color3.fromRGB(30,30,30)
+notif.BorderSizePixel = 0
+Instance.new("UICorner", notif).CornerRadius = UDim.new(0,12)
+
+local text = Instance.new("TextLabel", notif)
+text.Size = UDim2.new(1, -20, 1, 0)
+text.Position = UDim2.new(0, 10, 0, 0)
+text.BackgroundTransparency = 1
+text.Text = "🛡️ Anti AFK Aktif"
+text.TextColor3 = Color3.new(1,1,1)
+text.Font = Enum.Font.GothamBold
+text.TextSize = 16
+text.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ANIM MASUK
+TweenService:Create(
+	notif,
+	TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+	{Position = UDim2.new(1, -270, 1, -70)}
+):Play()
+
+-- AUTO HIDE
+task.delay(4, function()
+	TweenService:Create(
+		notif,
+		TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+		{Position = UDim2.new(1, -270, 1, 70)}
+	):Play()
+	task.wait(0.5)
+	gui:Destroy()
 end)
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Anti AFK loaded!",
-    Text = "Made by Tuuguu936",
-    Button1 = "Okay",
-    Duration = 5
-})
+
+----------------------------------------------------
+-- ANTI AFK LOGIC
+----------------------------------------------------
+local MOVE_INTERVAL = 30
+local CLICK_DELAY = 0.2
+local lastMove = tick()
+
+local function doAntiAFK()
+	VirtualUser:CaptureController()
+
+	-- Gerak mouse
+	VirtualUser:MoveMouseRelative(3, 3)
+	task.wait(0.05)
+	VirtualUser:MoveMouseRelative(-3, -3)
+
+	-- Klik
+	task.wait(CLICK_DELAY)
+	VirtualUser:ClickButton2(Vector2.new())
+	task.wait(CLICK_DELAY)
+	VirtualUser:ClickButton1(Vector2.new())
+end
+
+-- Event bawaan Roblox
+player.Idled:Connect(function()
+	doAntiAFK()
+end)
+
+-- Loop penguat
+RunService.Heartbeat:Connect(function()
+	if tick() - lastMove >= MOVE_INTERVAL then
+		lastMove = tick()
+		doAntiAFK()
+	end
+end)
+
+print("✅ Anti AFK aktif + notif")
+
     end
 })
 
@@ -212,14 +292,6 @@ GUI:CreateButton({
     text = "Auto  Claim", 
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Claim"))()
-end})
-
-GUI:CreateToggle({
-    parent = main, 
-    text = "Anti AFK", 
-    default = true, 
-    callback = function()
-local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Christmas"))()
 end})
 
 GUI:CreateButton({
