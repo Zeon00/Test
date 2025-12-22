@@ -7,8 +7,9 @@ repeat task.wait() until player:FindFirstChild("PlayerGui")
 local parentGui = gethui and gethui() or player.PlayerGui
 
 -- STATE
-local runningPT = false
-local runningReset = false
+-- STATE
+local runningPT = true        -- default ON
+local runningReset = true     -- default ON
 local minimized = false
 local PT_INTERVAL = 1      -- PT loop setiap 1 detik
 local RESET_INTERVAL = 3600 -- ResetPlayTime setiap 1 jam
@@ -76,10 +77,10 @@ Instance.new("UICorner", mini)
 -- TOGGLE PT LOOP
 local togglePT = Instance.new("TextButton")
 togglePT.Parent = frame
-togglePT.Text = "PT Loop: OFF"
+togglePT.Text = "PT Loop: ON"
 togglePT.Size = UDim2.new(0,260,0,45)
 togglePT.Position = UDim2.new(0.5,-130,0,60)
-togglePT.BackgroundColor3 = Color3.fromRGB(120,60,60)
+togglePT.BackgroundColor3 = Color3.fromRGB(60,120,60) -- hijau
 togglePT.TextColor3 = Color3.new(1,1,1)
 togglePT.Font = Enum.Font.GothamBold
 togglePT.TextSize = 16
@@ -88,10 +89,10 @@ Instance.new("UICorner", togglePT)
 -- TOGGLE RESET LOOP
 local toggleReset = Instance.new("TextButton")
 toggleReset.Parent = frame
-toggleReset.Text = "ResetPlayTime: OFF"
+toggleReset.Text = "ResetPlayTime: ON"
 toggleReset.Size = UDim2.new(0,260,0,45)
 toggleReset.Position = UDim2.new(0.5,-130,0,120)
-toggleReset.BackgroundColor3 = Color3.fromRGB(120,60,60)
+toggleReset.BackgroundColor3 = Color3.fromRGB(60,120,60) -- hijau
 toggleReset.TextColor3 = Color3.new(1,1,1)
 toggleReset.Font = Enum.Font.GothamBold
 toggleReset.TextSize = 16
