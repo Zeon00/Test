@@ -300,3 +300,10 @@ GUI:CreateButton({
     callback = function()
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Christmas"))()
 end})
+GUI:CreateToggle({
+    parent = main, 
+    text = "AUTO Christmas Event", 
+    default = true, 
+    callback = function()
+local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Zeon00/Ascension/refs/heads/main/Auto%20Christmas"))()
+end})
