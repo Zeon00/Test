@@ -311,20 +311,35 @@ end)
 --====================================================
 -- AUTO HATCH LOOP
 --====================================================
+--====================================================
+-- AUTO HATCH LOOP (FIXED - BRIDGENET)
+--====================================================
 task.spawn(function()
 	while alive do
-		task.wait(1)
-		if autoBridge then
-			pcall(function()
-				game:GetService("ReplicatedStorage")
-					.BridgeNet.dataRemoteEvent:FireServer({
-						{
-							{"\001","\139!\027(\219OO\n\175\243\142\244y\242 =","Christmas"},
-							"\004"
-						}
-					})
-			end)
-		end
+		task.wait(0.1)
+
+		if not autoBridge then continue end
+		if waitingResult then continue end
+		if #Enemies:GetChildren() > 0 then continue end
+
+		local args = {
+			{
+				{
+					"\001",
+					"\139!\027(\219OO\n\175\243\142\244y\242 =",
+					"Christmas"
+				},
+				"\004"
+			}
+		}
+
+		pcall(function()
+			game:GetService("ReplicatedStorage")
+				.BridgeNet
+				.dataRemoteEvent
+				:FireServer(unpack(args))
+		end)
 	end
 end)
+
 print("FINAL AUTO GRINCH LOADED | FULL | STABLE")
